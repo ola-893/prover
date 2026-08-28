@@ -2,10 +2,9 @@
 pragma solidity ^0.8.23;
 
 /*
- * The laterality decoder and mock-boundary approach are derived from index41:
- * https://github.com/edycutjong/index41/tree/767eb0a3eb61bfa6e2ec64ff035ebe8343ddf8f0
+ * The laterality decoder and mock-boundary approach include portions adapted from software
  * Copyright (c) 2026 Edy Cu. Used under the MIT License reproduced in
- * contracts/src/attestcoin/INDEX41_LICENSE.md.
+ * contracts/src/attestcoin/EDY_CU_MIT_NOTICE.md.
  */
 
 import { INativeQueryVerifier } from "../../src/attestcoin/INativeQueryVerifier.sol";

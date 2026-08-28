@@ -8,7 +8,7 @@ import { MockNativeQueryVerifier } from "./mocks/MockNativeQueryVerifier.sol";
 import { TestBase } from "./TestBase.sol";
 
 contract AttestcoinProofAdapterTest is TestBase {
-    bytes32 private constant ROOT = keccak256("index41:block-25764741:tx-root");
+    bytes32 private constant ROOT = keccak256("ordering-proof:block-25764741:tx-root");
 
     MockNativeQueryVerifier private verifier;
     AttestcoinProofAdapter private adapter;
@@ -18,7 +18,7 @@ contract AttestcoinProofAdapterTest is TestBase {
         adapter = new AttestcoinProofAdapter(verifier);
     }
 
-    function test_Index41LateralityRecovers14Then15Then16() public {
+    function test_LateralityRecovers14Then15Then16() public {
         AttestcoinProofAdapter.BlockContext memory context = _context();
         AttestcoinProofAdapter.TransactionInclusion[] memory inclusions =
             new AttestcoinProofAdapter.TransactionInclusion[](3);

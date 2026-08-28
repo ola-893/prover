@@ -58,7 +58,7 @@ export default function Home() {
                 <span className="block text-[#b8f34a]">Enforce the promise.</span>
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-7 text-white/55 sm:text-lg sm:leading-8">
-                Index41 exposes a relay sandwich. FairExit exposes a vault queue inversion.
+                A Merkle-order proof exposes a relay sandwich. FairExit exposes a vault queue inversion.
                 The transaction payload never says “I was first”—the Merkle path does.
               </p>
 
@@ -91,7 +91,7 @@ export default function Home() {
             </div>
 
             <div id="order-proofs" className="scroll-mt-24 space-y-3">
-              <Index41Flagship />
+              <SandwichFlagship />
               <FairExitFlagship />
             </div>
           </div>
@@ -118,14 +118,14 @@ export default function Home() {
   );
 }
 
-function Index41Flagship() {
+function SandwichFlagship() {
   return (
     <article className="rounded-2xl border border-[#ff9f67]/22 bg-[#15251e]/92 p-5 shadow-[0_28px_80px_rgba(0,0,0,.25)] sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="mb-2 flex items-center gap-2">
             <span className="size-2 rounded-full bg-[#ff9f67] shadow-[0_0_12px_#ff9f67]" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#ffb389]">Index41 verdict</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#ffb389]">Sandwich verdict</span>
           </div>
           <h2 className="text-xl font-semibold tracking-[-0.025em]">No-sandwich covenant broken</h2>
         </div>

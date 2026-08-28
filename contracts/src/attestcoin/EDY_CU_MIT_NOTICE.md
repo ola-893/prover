@@ -1,9 +1,7 @@
-# index41 attribution
+# MIT attribution notice
 
-Portions of the Attestcoin verifier interface and test approach in this directory are derived from
-index41 at commit `767eb0a3eb61bfa6e2ec64ff035ebe8343ddf8f0`:
-
-https://github.com/edycutjong/index41
+Portions of the Attestcoin verifier interface and deterministic laterality-test approach in this
+directory are adapted from software Copyright (c) 2026 Edy Cu.
 
 MIT License
 

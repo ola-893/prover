@@ -80,7 +80,7 @@ For the requested binary split, **A and B are product-buildable/provable financi
 | 53 | Bounty issuers | Canonically accepted submission followed by wrong/late payout. | Accepted winner never paid. | Objective validity of subjective/offchain submission without an accepted adjudicator. |
 | 54 | Onchain-paid service providers | Submitted result rejected by a deterministic verifier; wrong result/version; positively late delivery. | No result by deadline; canonical job expiry/slash. | Generic quality of auditing, development, storage, compute or other offchain services. A self-emitted completion event proves only the assertion. |
 
-## Sorted result: strongest A-grade direct Index41-style breaches
+## Sorted result: strongest A-grade direct transaction-order breaches
 
 These require only positive authenticated evidence and objective pre-existing terms:
 

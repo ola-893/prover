@@ -2,9 +2,8 @@
 pragma solidity ^0.8.23;
 
 /*
- * The interface layout and precompile address are derived from index41:
- * https://github.com/edycutjong/index41/tree/767eb0a3eb61bfa6e2ec64ff035ebe8343ddf8f0
- * Copyright (c) 2026 Edy Cu. Used under the MIT License reproduced in INDEX41_LICENSE.md.
+ * Portions adapted from software Copyright (c) 2026 Edy Cu.
+ * Used under the MIT License reproduced in EDY_CU_MIT_NOTICE.md.
  */
 
 /// @title INativeQueryVerifier

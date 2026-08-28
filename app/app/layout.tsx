@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'PROVER — Prove the order. Enforce the promise.',
     description:
-      'Index41 proves sandwich ordering. FairExit proves queue inversion. Bonded promises become enforceable evidence.',
+      'Merkle paths prove sandwich ordering. FairExit proves queue inversion. Bonded promises become enforceable evidence.',
     type: 'website',
     images: [{ url: '/og.png', width: 1200, height: 630, alt: 'PROVER ordering court' }],
   },
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'PROVER — Prove the order. Enforce the promise.',
     description:
-      'Index41 proves sandwich ordering. FairExit proves queue inversion. Bonded promises become enforceable evidence.',
+      'Merkle paths prove sandwich ordering. FairExit proves queue inversion. Bonded promises become enforceable evidence.',
     images: ['/og.png'],
   },
 };
