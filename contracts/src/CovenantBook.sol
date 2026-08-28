@@ -22,12 +22,15 @@ interface IAttestedHeightSource {
 
 /// @title CovenantBook
 /// @notice Immutable, native-CTC bonds behind typed source-chain performance promises.
-/// @dev Covenant terms cannot be edited, cancelled, shortened or retroactively activated. A bond
-///      can leave the book only through a court ruling or after the source-chain coverage and a
-///      fixed source-block claim window have both passed. All transfers use pull payouts.
+/// @dev Covenant terms cannot be edited, cancelled or shortened. Activation is explicit and must
+///      clear a minimum lead over the latest attested tip; clients must also place it beyond the
+///      live source head. Bonds leave only through rulings or post-coverage maturity. Payouts pull.
 contract CovenantBook {
     /// @notice Seven days at Ethereum's 12-second block cadence. The MVP supports Ethereum and Sepolia.
     uint64 public constant CLAIM_WINDOW_BLOCKS = 50_400;
+    /// @notice Minimum lead beyond the latest attested tip. Clients should additionally choose a
+    ///         height beyond the live source head because an attestation may lag that head.
+    uint64 public constant MIN_ATTESTED_LEAD_BLOCKS = 64;
 
     enum CovenantType {
         NO_SANDWICH,
@@ -96,6 +99,7 @@ contract CovenantBook {
     error InsufficientInitialBond(uint256 supplied, uint256 minimum);
     error SourceChainNotAttested(uint64 chainKey);
     error HeightOverflow();
+    error ActivationLeadTooShort(uint64 requestedHeight, uint64 minimumHeight);
     error CoverageEndsBeforeActivation(uint64 validFromHeight, uint64 validUntilHeight);
     error CovenantNotFound(bytes32 covenantId);
     error WrongCourt(address caller, address expected);
@@ -149,26 +153,38 @@ contract CovenantBook {
         }
     }
 
-    /// @notice Posts an immutable no-sandwich promise starting after the current attested tip.
+    /// @notice Posts an immutable no-sandwich promise at an explicit future source height.
     function openNoSandwich(
         uint64 chainKey,
         address sourceContract,
+        uint64 validFromHeight,
         uint64 validUntilHeight,
         bytes32 policyHash,
         uint256 fixedPenalty
     ) external payable returns (bytes32 covenantId) {
-        return _open(CovenantType.NO_SANDWICH, chainKey, sourceContract, validUntilHeight, policyHash, fixedPenalty);
+        return _open(
+            CovenantType.NO_SANDWICH,
+            chainKey,
+            sourceContract,
+            validFromHeight,
+            validUntilHeight,
+            policyHash,
+            fixedPenalty
+        );
     }
 
-    /// @notice Posts an immutable FIFO promise starting after the current attested tip.
+    /// @notice Posts an immutable FIFO promise at an explicit future source height.
     function openFifo(
         uint64 chainKey,
         address sourceContract,
+        uint64 validFromHeight,
         uint64 validUntilHeight,
         bytes32 policyHash,
         uint256 fixedPenalty
     ) external payable returns (bytes32 covenantId) {
-        return _open(CovenantType.FIFO, chainKey, sourceContract, validUntilHeight, policyHash, fixedPenalty);
+        return _open(
+            CovenantType.FIFO, chainKey, sourceContract, validFromHeight, validUntilHeight, policyHash, fixedPenalty
+        );
     }
 
     /// @notice Settles a proof-derived violation and credits a pull payout.
@@ -257,6 +273,7 @@ contract CovenantBook {
         CovenantType covenantType,
         uint64 chainKey,
         address sourceContract,
+        uint64 validFromHeight,
         uint64 validUntilHeight,
         bytes32 policyHash,
         uint256 fixedPenalty
@@ -267,11 +284,15 @@ contract CovenantBook {
         if (msg.value < fixedPenalty) revert InsufficientInitialBond(msg.value, fixedPenalty);
 
         IAttestedHeightSource.HeightHashResult memory tip = _latestAttested(chainKey);
-        if (tip.height == type(uint64).max || validUntilHeight > type(uint64).max - CLAIM_WINDOW_BLOCKS) {
+        if (
+            tip.height > type(uint64).max - MIN_ATTESTED_LEAD_BLOCKS
+                || validUntilHeight > type(uint64).max - CLAIM_WINDOW_BLOCKS
+        ) {
             revert HeightOverflow();
         }
 
-        uint64 validFromHeight = tip.height + 1;
+        uint64 minimumHeight = tip.height + MIN_ATTESTED_LEAD_BLOCKS;
+        if (validFromHeight < minimumHeight) revert ActivationLeadTooShort(validFromHeight, minimumHeight);
         if (validUntilHeight < validFromHeight) {
             revert CoverageEndsBeforeActivation(validFromHeight, validUntilHeight);
         }

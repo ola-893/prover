@@ -65,6 +65,13 @@ contract AttestcoinProofAdapter {
         external
         returns (VerifiedTransaction[] memory results)
     {
+        return _verifySameBlockBatch(context, inclusions);
+    }
+
+    function _verifySameBlockBatch(BlockContext calldata context, TransactionInclusion[] calldata inclusions)
+        internal
+        returns (VerifiedTransaction[] memory results)
+    {
         uint256 length = inclusions.length;
         if (length == 0) revert EmptyBatch();
 

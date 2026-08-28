@@ -52,6 +52,8 @@ contract PayoutReceiver {
 contract CovenantBookTest is TestBase {
     uint64 internal constant CHAIN_KEY = 1;
     uint64 internal constant INITIAL_TIP = 1_000;
+    uint64 internal constant MIN_LEAD = 64;
+    uint64 internal constant VALID_FROM = 1_100;
     uint64 internal constant VALID_UNTIL = 2_000;
 
     address internal constant OPERATOR = address(0xA11CE);
@@ -73,7 +75,7 @@ contract CovenantBookTest is TestBase {
         VmDeal(address(vm)).deal(OPERATOR, 1_000 ether);
     }
 
-    function test_NoSandwichCovenantIsOperatorBoundAndCannotActivateRetroactively() public {
+    function test_NoSandwichCovenantIsOperatorBoundWithExplicitFutureActivation() public {
         bytes32 covenantId = _openNoSandwich(30 ether, 10 ether);
         CovenantBook.Covenant memory covenant = book.covenantOf(covenantId);
 
@@ -82,18 +84,29 @@ contract CovenantBookTest is TestBase {
         assertEq(covenant.policyHash, POLICY_HASH);
         assertEq(uint256(covenant.covenantType), uint256(CovenantBook.CovenantType.NO_SANDWICH));
         assertEq(covenant.chainKey, CHAIN_KEY);
-        assertEq(covenant.validFromHeight, INITIAL_TIP + 1);
+        assertEq(covenant.validFromHeight, VALID_FROM);
         assertEq(covenant.validUntilHeight, VALID_UNTIL);
         assertEq(covenant.claimDeadlineHeight, VALID_UNTIL + book.CLAIM_WINDOW_BLOCKS());
         assertEq(covenant.fixedPenalty, 10 ether);
         assertEq(covenant.initialBond, 30 ether);
         assertEq(covenant.remainingBond, 30 ether);
+        assertEq(book.MIN_ATTESTED_LEAD_BLOCKS(), MIN_LEAD);
 
         vm.prank(OPERATOR);
         vm.expectRevert(
-            abi.encodeWithSelector(CovenantBook.CoverageEndsBeforeActivation.selector, INITIAL_TIP + 1, INITIAL_TIP)
+            abi.encodeWithSelector(
+                CovenantBook.ActivationLeadTooShort.selector, INITIAL_TIP + MIN_LEAD - 1, INITIAL_TIP + MIN_LEAD
+            )
         );
-        book.openNoSandwich{ value: 10 ether }(CHAIN_KEY, SOURCE, INITIAL_TIP, POLICY_HASH, 10 ether);
+        book.openNoSandwich{ value: 10 ether }(
+            CHAIN_KEY, SOURCE, INITIAL_TIP + MIN_LEAD - 1, VALID_UNTIL, POLICY_HASH, 10 ether
+        );
+
+        vm.prank(OPERATOR);
+        vm.expectRevert(
+            abi.encodeWithSelector(CovenantBook.CoverageEndsBeforeActivation.selector, VALID_FROM, VALID_FROM - 1)
+        );
+        book.openNoSandwich{ value: 10 ether }(CHAIN_KEY, SOURCE, VALID_FROM, VALID_FROM - 1, POLICY_HASH, 10 ether);
     }
 
     function test_FifoCovenantCanOnlyBeSettledByFifoCourt() public {
@@ -152,9 +165,7 @@ contract CovenantBookTest is TestBase {
         bytes32 covenantId = _openNoSandwich(20 ether, 10 ether);
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                CovenantBook.BreachOutsideCoverage.selector, INITIAL_TIP, INITIAL_TIP + 1, VALID_UNTIL
-            )
+            abi.encodeWithSelector(CovenantBook.BreachOutsideCoverage.selector, INITIAL_TIP, VALID_FROM, VALID_UNTIL)
         );
         sandwichCourt.settle(book, covenantId, keccak256("too-early"), INITIAL_TIP, OTHER);
 
@@ -201,20 +212,21 @@ contract CovenantBookTest is TestBase {
         chainInfo.setTip(99, 0, false);
         vm.prank(OPERATOR);
         vm.expectRevert(abi.encodeWithSelector(CovenantBook.SourceChainNotAttested.selector, uint64(99)));
-        book.openFifo{ value: 10 ether }(99, SOURCE, VALID_UNTIL, POLICY_HASH, 10 ether);
+        book.openFifo{ value: 10 ether }(99, SOURCE, VALID_FROM, VALID_UNTIL, POLICY_HASH, 10 ether);
 
         vm.prank(OPERATOR);
         vm.expectRevert(abi.encodeWithSelector(CovenantBook.InsufficientInitialBond.selector, 9 ether, 10 ether));
-        book.openFifo{ value: 9 ether }(CHAIN_KEY, SOURCE, VALID_UNTIL, POLICY_HASH, 10 ether);
+        book.openFifo{ value: 9 ether }(CHAIN_KEY, SOURCE, VALID_FROM, VALID_UNTIL, POLICY_HASH, 10 ether);
     }
 
     function _openNoSandwich(uint256 bond, uint256 penalty) private returns (bytes32 covenantId) {
         vm.prank(OPERATOR);
-        covenantId = book.openNoSandwich{ value: bond }(CHAIN_KEY, SOURCE, VALID_UNTIL, POLICY_HASH, penalty);
+        covenantId =
+            book.openNoSandwich{ value: bond }(CHAIN_KEY, SOURCE, VALID_FROM, VALID_UNTIL, POLICY_HASH, penalty);
     }
 
     function _openFifo(uint256 bond, uint256 penalty) private returns (bytes32 covenantId) {
         vm.prank(OPERATOR);
-        covenantId = book.openFifo{ value: bond }(CHAIN_KEY, SOURCE, VALID_UNTIL, POLICY_HASH, penalty);
+        covenantId = book.openFifo{ value: bond }(CHAIN_KEY, SOURCE, VALID_FROM, VALID_UNTIL, POLICY_HASH, penalty);
     }
 }
