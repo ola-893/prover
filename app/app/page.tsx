@@ -1,177 +1,199 @@
 import {
+  ArrowDown,
   ArrowRight,
-  Check,
-  Landmark,
+  Gavel,
+  GitCompareArrows,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react';
 
+import { PerformanceDemo } from '@/components/performance-demo';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-
-const evidence = [
-  {
-    action: 'Borrow',
-    amount: '7,500 USDC',
-    detail: 'Aave V3 · Ethereum #22,450,182',
-  },
-  {
-    action: 'Repay',
-    amount: '7,500 USDC',
-    detail: 'Aave V3 · Ethereum #22,781,904',
-  },
-];
+import { buttonVariants } from '@/components/ui/button';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-white/8 bg-[#091511]/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-[1480px] items-center justify-between px-5 sm:px-8">
-          <div className="flex items-center gap-3">
+    <main className="min-h-screen bg-[#091511] text-white">
+      <header className="sticky top-0 z-50 border-b border-white/8 bg-[#091511]/88 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-[1500px] items-center justify-between px-4 sm:px-7 lg:px-10">
+          <a href="#top" className="flex items-center gap-3" aria-label="Prover home">
             <span className="grid size-9 place-items-center rounded-xl bg-[#b8f34a] text-[#0a1712]">
-              <ShieldCheck className="size-5" strokeWidth={2.4} />
+              <ShieldCheck className="size-5" strokeWidth={2.5} />
             </span>
             <div>
-              <p className="text-[15px] font-semibold tracking-[-0.02em] text-white">
-                Proof Bureau
-              </p>
-              <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-white/45">
-                Attestcoin evidence network
+              <p className="text-[15px] font-bold tracking-[-0.02em]">PROVER</p>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/38">
+                Ordering court
               </p>
             </div>
+          </a>
+
+          <div className="hidden items-center gap-7 text-xs text-white/50 md:flex">
+            <a className="transition hover:text-white" href="#order-proofs">Order proofs</a>
+            <a className="transition hover:text-white" href="#court">Live docket</a>
+            <a className="transition hover:text-white" href="#consequence">Financial consequence</a>
           </div>
+
           <Badge className="border border-[#b8f34a]/20 bg-[#b8f34a]/10 text-[#c9fa72]">
-            CC3 testnet
+            Built on Attestcoin
           </Badge>
         </div>
       </header>
 
-      <section className="border-b border-white/8 bg-[#091511] px-5 pb-24 pt-12 text-white sm:px-8 sm:pt-16">
-        <div className="mx-auto max-w-[1480px]">
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
+      <section id="top" className="relative overflow-hidden border-b border-white/8 px-4 pb-20 pt-16 sm:px-7 sm:pb-28 sm:pt-24 lg:px-10">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,.035)_1px,transparent_1px)] [background-size:44px_44px]"
+        />
+        <div aria-hidden="true" className="absolute -right-48 -top-48 size-[580px] rounded-full bg-[#b8f34a]/10 blur-[110px]" />
+        <div aria-hidden="true" className="absolute -bottom-64 -left-32 size-[520px] rounded-full bg-[#2a6b51]/20 blur-[100px]" />
+
+        <div className="relative mx-auto max-w-[1500px]">
+          <div className="grid items-end gap-12 xl:grid-cols-[0.88fr_1.12fr]">
             <div className="max-w-3xl">
-              <div className="mb-4 flex items-center gap-2 text-xs font-medium text-[#b8f34a]">
-                <span className="size-1.5 rounded-full bg-[#b8f34a] shadow-[0_0_12px_#b8f34a]" />
-                Ethereum evidence finalized on Creditcoin
-              </div>
-              <h1 className="text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl lg:text-[62px] lg:leading-[1.02]">
-                Lending terms that can show their work.
+              <Badge className="mb-5 border border-white/10 bg-white/[0.045] text-[#c9fa72]">
+                <GitCompareArrows className="size-3" /> Merkle laterality becomes evidence
+              </Badge>
+              <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.06em] sm:text-6xl lg:text-[76px]">
+                Prove the order.
+                <span className="block text-[#b8f34a]">Enforce the promise.</span>
               </h1>
-              <p className="mt-5 max-w-2xl text-[15px] leading-7 text-white/55 sm:text-base">
-                Verified Aave performance becomes an explainable lending profile.
-                Covenant violations become permanent, attributable records.
+              <p className="mt-6 max-w-2xl text-base leading-7 text-white/55 sm:text-lg sm:leading-8">
+                Index41 exposes a relay sandwich. FairExit exposes a vault queue inversion.
+                The transaction payload never says “I was first”—the Merkle path does.
               </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a
+                  href="#order-proofs"
+                  className={buttonVariants({ className: 'h-11 rounded-xl bg-[#b8f34a] px-4 text-[#0a1712] hover:bg-[#d0ff78]' })}
+                >
+                  Inspect both verdicts
+                  <ArrowDown className="size-4" />
+                </a>
+                <a
+                  href="#court"
+                  className={buttonVariants({ variant: 'outline', className: 'h-11 rounded-xl border-white/12 bg-white/[0.035] px-4 text-white hover:bg-white/10 hover:text-white' })}
+                >
+                  Open the evidence court
+                  <ArrowRight className="size-4" />
+                </a>
+              </div>
+
+              <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 font-mono text-[10px] uppercase tracking-[0.1em] text-white/30">
+                <span>verifyAndEmit</span>
+                <span className="text-[#b8f34a]/55">→</span>
+                <span>calculateTxIndex</span>
+                <span className="text-[#b8f34a]/55">→</span>
+                <span>deterministic verdict</span>
+                <span className="text-[#b8f34a]/55">→</span>
+                <span>bond slashed</span>
+              </div>
             </div>
-            <Button className="h-11 rounded-xl bg-[#b8f34a] px-4 text-[#0a1712] hover:bg-[#d0ff78]">
-              Run covenant demo
-              <ArrowRight data-icon="inline-end" />
-            </Button>
-          </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1.45fr_0.8fr]">
-            <Card className="border-0 bg-[#f4f1e8] text-[#13231c] ring-0">
-              <CardHeader className="border-b border-[#13231c]/10 pb-5 sm:grid-cols-[1fr_auto]">
-                <div>
-                  <div className="mb-3 flex flex-wrap items-center gap-2">
-                    <Badge className="bg-[#13231c] text-white">Verified profile</Badge>
-                    <Badge variant="outline" className="border-[#13231c]/15 font-mono text-[#536159]">
-                      0x71C7…3A91
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
-                    Transparent performance, not a mystery score.
-                  </CardTitle>
-                  <CardDescription className="mt-2 max-w-2xl text-[#58665f]">
-                    Two authenticated Aave events support this profile. They do not claim
-                    completeness or current solvency.
-                  </CardDescription>
-                </div>
-                <div className="mt-4 grid size-24 place-items-center rounded-full border-[7px] border-[#b8f34a] bg-white/70 lg:mt-0">
-                  <div className="text-center">
-                    <strong className="block text-2xl leading-none">2/2</strong>
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#65736b]">
-                      events
-                    </span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="grid gap-3 pt-5 md:grid-cols-2">
-                {evidence.map((item) => (
-                  <div key={item.action} className="rounded-xl border border-[#13231c]/10 bg-white/60 p-4">
-                    <div className="mb-4 flex items-center justify-between">
-                      <span className="grid size-7 place-items-center rounded-full bg-[#dfffa6] text-[#17351f]">
-                        <Check className="size-4" strokeWidth={2.7} />
-                      </span>
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-[#728078]">
-                        Merkle verified
-                      </span>
-                    </div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.13em] text-[#69766f]">
-                      {item.action}
-                    </p>
-                    <p className="mt-1 text-xl font-semibold tracking-[-0.03em]">{item.amount}</p>
-                    <p className="mt-2 font-mono text-[10px] text-[#718078]">{item.detail}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card className="border border-white/10 bg-[#12221b] text-white ring-0">
-              <CardHeader>
-                <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-[#b8f34a]/12 text-[#b8f34a]">
-                  <Landmark className="size-5" />
-                </div>
-                <CardTitle className="text-xl tracking-[-0.025em]">Credit terms unlocked</CardTitle>
-                <CardDescription className="text-white/45">
-                  Policy v1.0 · calculated from disclosed evidence
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="rounded-xl border border-white/8 bg-white/[0.035] p-4">
-                  <p className="text-xs text-white/45">Required collateral</p>
-                  <div className="mt-1 flex items-end justify-between gap-4">
-                    <strong className="text-3xl tracking-[-0.04em]">132%</strong>
-                    <span className="mb-1 text-xs text-[#b8f34a]">150% baseline ↓</span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl border border-white/8 bg-white/[0.035] p-4">
-                    <p className="text-xs text-white/45">Rate adjustment</p>
-                    <strong className="mt-2 block text-lg">−1.4%</strong>
-                  </div>
-                  <div className="rounded-xl border border-white/8 bg-white/[0.035] p-4">
-                    <p className="text-xs text-white/45">Evidence confidence</p>
-                    <strong className="mt-2 flex items-center gap-1.5 text-lg text-[#c9fa72]">
-                      <Sparkles className="size-4" /> High
-                    </strong>
-                  </div>
-                </div>
-                <p className="px-1 pt-1 text-[11px] leading-5 text-white/35">
-                  Terms are policy outputs, not Attestcoin facts. Every adjustment links back
-                  to the evidence and rule that produced it.
-                </p>
-              </CardContent>
-            </Card>
+            <div id="order-proofs" className="scroll-mt-24 space-y-3">
+              <Index41Flagship />
+              <FairExitFlagship />
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1480px] px-5 py-8 sm:px-8">
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">Next in the docket</span>
-          <ArrowRight className="size-4" />
-          No-sandwich relay covenant
-          <ArrowRight className="size-4" />
-          FairExit FIFO covenant
+      <section id="consequence" className="border-b border-white/8 bg-[#0d1d17] px-4 py-5 sm:px-7 lg:px-10">
+        <div className="mx-auto flex max-w-[1500px] flex-col justify-between gap-3 md:flex-row md:items-center">
+          <div className="flex items-center gap-3">
+            <span className="grid size-8 place-items-center rounded-lg bg-[#b8f34a]/10 text-[#b8f34a]">
+              <Gavel className="size-4" />
+            </span>
+            <p className="text-sm font-medium">The ruling is the product. Credit is one consequence.</p>
+          </div>
+          <p className="max-w-2xl text-xs leading-5 text-white/40">
+            A proven breach follows the operator into future borrowing limits, premiums and bond requirements;
+            verified Aave performance uses the same transparent record without becoming another opaque score.
+          </p>
         </div>
       </section>
+
+      <PerformanceDemo />
     </main>
+  );
+}
+
+function Index41Flagship() {
+  return (
+    <article className="rounded-2xl border border-[#ff9f67]/22 bg-[#15251e]/92 p-5 shadow-[0_28px_80px_rgba(0,0,0,.25)] sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="mb-2 flex items-center gap-2">
+            <span className="size-2 rounded-full bg-[#ff9f67] shadow-[0_0_12px_#ff9f67]" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#ffb389]">Index41 verdict</span>
+          </div>
+          <h2 className="text-xl font-semibold tracking-[-0.025em]">No-sandwich covenant broken</h2>
+        </div>
+        <Badge className="bg-[#ff9f67]/12 text-[#ffb389]">3 proofs · 1 block</Badge>
+      </div>
+
+      <div className="mt-5 grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-2">
+        <Position index="14" label="front-run" accent="orange" />
+        <ArrowRight className="size-4 text-white/25" />
+        <Position index="15" label="victim" accent="lime" />
+        <ArrowRight className="size-4 text-white/25" />
+        <Position index="16" label="back-run" accent="orange" />
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/8 pt-4">
+        <p className="font-mono text-[10px] text-white/38">RLLLRRRR → 14 · authenticated receipt logs → same pool</p>
+        <span className="text-xs font-semibold text-[#ffb389]">front &lt; victim &lt; back ✓</span>
+      </div>
+    </article>
+  );
+}
+
+function FairExitFlagship() {
+  return (
+    <article className="rounded-2xl border border-[#78bfff]/20 bg-[#10241f]/92 p-5 shadow-[0_28px_80px_rgba(0,0,0,.2)] sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="mb-2 flex items-center gap-2">
+            <span className="size-2 rounded-full bg-[#78bfff] shadow-[0_0_12px_#78bfff]" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9dd0f5]">FairExit verdict</span>
+          </div>
+          <h2 className="text-xl font-semibold tracking-[-0.025em]">FIFO exit covenant broken</h2>
+        </div>
+        <Badge className="bg-[#78bfff]/10 text-[#a8d8f9]">4 positive proofs</Badge>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <OrderLane label="Requests" left="A · request #7" right="B · request #8" />
+        <OrderLane label="Processed" left="B · request #8" right="A · request #7" inverted />
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/8 pt-4">
+        <p className="font-mono text-[10px] text-white/38">request A &lt; B · process B &lt; A</p>
+        <span className="text-xs font-semibold text-[#9dd0f5]">completed inversion ✓</span>
+      </div>
+    </article>
+  );
+}
+
+function Position({ index, label, accent }: { index: string; label: string; accent: 'orange' | 'lime' }) {
+  const isLime = accent === 'lime';
+  return (
+    <div className={`rounded-xl border p-3 text-center ${isLime ? 'border-[#b8f34a]/28 bg-[#b8f34a]/9' : 'border-[#ff9f67]/18 bg-[#ff9f67]/[0.055]'}`}>
+      <span className={`block text-2xl font-semibold tracking-[-0.04em] ${isLime ? 'text-[#c9fa72]' : 'text-[#ffb389]'}`}>{index}</span>
+      <span className="mt-1 block text-[9px] font-medium uppercase tracking-[0.1em] text-white/38">{label}</span>
+    </div>
+  );
+}
+
+function OrderLane({ label, left, right, inverted = false }: { label: string; left: string; right: string; inverted?: boolean }) {
+  return (
+    <div className={`rounded-xl border p-3.5 ${inverted ? 'border-[#78bfff]/28 bg-[#78bfff]/8' : 'border-white/8 bg-white/[0.025]'}`}>
+      <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/32">{label}</p>
+      <div className="mt-2 flex items-center gap-2">
+        <span className="min-w-0 flex-1 rounded-lg bg-white/[0.055] px-2 py-2 text-center font-mono text-[10px] text-white/65">{left}</span>
+        <ArrowRight className={`size-3.5 shrink-0 ${inverted ? 'text-[#78bfff]' : 'text-white/25'}`} />
+        <span className="min-w-0 flex-1 rounded-lg bg-white/[0.055] px-2 py-2 text-center font-mono text-[10px] text-white/65">{right}</span>
+      </div>
+    </div>
   );
 }
