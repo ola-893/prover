@@ -503,7 +503,7 @@ function PredicateCard({ actor, step }: { actor: ActorKey; step: number }) {
         <div className="flex flex-wrap items-center gap-2 font-mono text-[10px]">
           <Badge variant="outline" className="border-[#47723a]/20 text-[#3d6531]">Borrow</Badge>
           <Link2 className="size-3.5 text-[#7d9273]" />
-          <span className="rounded-md bg-white/70 px-2 py-1.5 text-[#40543a]">onBehalfOf 0x71C7…3A91</span>
+          <span className="rounded-md bg-white/70 px-2 py-1.5 text-[#40543a]">onBehalfOf 0x5d99…2c66</span>
           <ArrowRight className="size-3.5 text-[#7d9273]" />
           <Badge variant="outline" className="border-[#47723a]/20 text-[#3d6531]">Repay.user matches</Badge>
         </div>

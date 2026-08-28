@@ -64,7 +64,7 @@ export const actors: Record<ActorKey, {
   borrower: {
     name: 'Aave borrower',
     role: 'Ethereum wallet',
-    address: '0x71C7…3A91',
+    address: '0x5d99…2c66',
     accent: '#b8f34a',
   },
   relay: {
@@ -142,25 +142,25 @@ export const demoSteps: DemoStep[] = [
 
 export const evidenceRecords: EvidenceRecord[] = [
   {
-    id: '0x8a21…10ee',
+    id: '0xbcac…c590ff',
     kind: 'AAVE_BORROW',
     subject: 'borrower',
-    title: 'Borrow · 7,500 USDC',
-    source: 'Aave V3 · Ethereum',
-    coordinate: '#22,450,182 · tx 91 · log 14',
-    proof: 'receipt + Merkle path',
+    title: 'Debt opened · 90,000 USDC',
+    source: 'Aave V3 · Ethereum mainnet',
+    coordinate: '#25,854,707 · 0xbcac…c590ff',
+    proof: 'fresh Attestcoin proof required',
     mode: 'fixture',
     visibleAt: 1,
     detail: 'Debt owner is decoded from indexed onBehalfOf—not inferred from tx.from.',
   },
   {
-    id: '0x2d7f…3ac9',
+    id: '0x84ea…ba344',
     kind: 'AAVE_REPAY',
     subject: 'borrower',
-    title: 'Repay · 7,500 USDC',
-    source: 'Aave V3 · Ethereum',
-    coordinate: '#22,781,904 · tx 37 · log 8',
-    proof: 'receipt + Merkle path',
+    title: 'Self-funded debt reduction · 90,000.055729 USDC',
+    source: 'Aave V3 · Ethereum mainnet',
+    coordinate: '#25,854,747 · 0x84ea…ba344',
+    proof: 'fresh Attestcoin proof required',
     mode: 'fixture',
     visibleAt: 1,
     detail: 'Beneficiary is decoded from indexed user; a third party may be the repayer.',
@@ -169,13 +169,13 @@ export const evidenceRecords: EvidenceRecord[] = [
     id: '0xf11e…77c2',
     kind: 'AAVE_CYCLE',
     subject: 'borrower',
-    title: 'Borrow → later-repay cycle',
+    title: 'Debt opened → later self-reduction',
     source: 'Performance Bureau',
-    coordinate: '331,722 blocks apart',
+    coordinate: '40 authenticated source blocks apart',
     proof: 'two authenticated facts',
     mode: 'fixture',
     visibleAt: 2,
-    detail: 'This is a performance cycle—not a claim that Aave debt was fully closed.',
+    detail: 'This real source pair is a proof candidate—not a claim that Aave debt was fully closed.',
   },
   {
     id: '0x19d4…41a0',
@@ -222,7 +222,7 @@ export function profileAt(actor: ActorKey, step: number): PerformanceProfile {
     profile.aaveBorrowFacts = 1;
     profile.aaveRepayFacts = 1;
     profile.matchedAaveCycles = 1;
-    profile.maxMatchedUsdc = 7_500;
+    profile.maxMatchedUsdc = 90_000;
   }
 
   if (actor === 'relay' && step >= 5) {
