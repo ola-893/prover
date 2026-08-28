@@ -13,9 +13,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Proof Bureau — Verified performance on Creditcoin',
+  metadataBase: new URL(process.env.SITE_URL ?? 'http://localhost:3000'),
+  title: 'PROVER — Prove the order. Enforce the promise.',
   description:
-    'An Attestcoin-powered performance bureau and enforcement court for borrowers and bonded financial promises.',
+    'An Attestcoin-powered ordering court that proves relay sandwiches and FIFO queue inversions, enforces bonded promises, and carries rulings into future financial terms.',
+  openGraph: {
+    title: 'PROVER — Prove the order. Enforce the promise.',
+    description:
+      'Index41 proves sandwich ordering. FairExit proves queue inversion. Bonded promises become enforceable evidence.',
+    type: 'website',
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'PROVER ordering court' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PROVER — Prove the order. Enforce the promise.',
+    description:
+      'Index41 proves sandwich ordering. FairExit proves queue inversion. Bonded promises become enforceable evidence.',
+    images: ['/og.png'],
+  },
 };
 
 export default function RootLayout({
