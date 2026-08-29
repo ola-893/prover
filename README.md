@@ -56,7 +56,7 @@ The browser fixtures are clearly labeled. A fixture is not presented as a live A
 | `OrderingCourt` | Applies policy-bound sandwich and FIFO predicates, persists rulings, and asks the bond book to settle them. |
 | `CovenantBook` | Holds immutable native-CTC bonds, enforces future coverage windows, and credits pull payments. |
 | `PerformanceBureau` | Stores reporter-scoped, replay-safe evidence records and per-address evidence vectors. |
-| `AaveEvidenceAdapter` | Decodes exact Aave V3 USDC Borrow/Repay receipt ordinals and derives a narrow self-repayment observation. |
+| `AaveEvidenceAdapter` | Decodes exact Aave V3 USDC Borrow/Repay receipt ordinals and derives a narrow self-repayment observation; its production subclass pins the native verifier. |
 | `PolicyV1` | Produces transparent experimental terms from the evidence vector. |
 | `DemoLender` | Freezes a quoted policy result into a demonstrative Creditcoin loan offer. |
 | `DemoExitVault` | Emits the unique, non-cancellable request/process schema required by the FairExit policy. |

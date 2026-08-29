@@ -4,7 +4,7 @@ pragma solidity ^0.8.23;
 import { PerformanceBureau } from "./PerformanceBureau.sol";
 import { AttestcoinProofAdapter } from "./attestcoin/AttestcoinProofAdapter.sol";
 import { EvmV1Decoder } from "./attestcoin/EvmV1Decoder.sol";
-import { INativeQueryVerifier } from "./attestcoin/INativeQueryVerifier.sol";
+import { INativeQueryVerifier, NativeQueryVerifierLib } from "./attestcoin/INativeQueryVerifier.sol";
 import { OrderingPredicates } from "./attestcoin/OrderingPredicates.sol";
 
 /// @title AaveEvidenceAdapter
@@ -322,4 +322,12 @@ contract AaveEvidenceAdapter is AttestcoinProofAdapter {
         if (fact.kind == FactKind.NONE) revert FactNotFound(factId);
         if (fact.kind != expected) revert WrongFactKind(factId, expected, fact.kind);
     }
+}
+
+/// @title NativeAaveEvidenceAdapter
+/// @notice Production adapter fixed to Creditcoin's Attestcoin verifier precompile at `0x...0FD2`.
+contract NativeAaveEvidenceAdapter is AaveEvidenceAdapter {
+    constructor(PerformanceBureau performanceBureau)
+        AaveEvidenceAdapter(NativeQueryVerifierLib.getVerifier(), performanceBureau)
+    { }
 }

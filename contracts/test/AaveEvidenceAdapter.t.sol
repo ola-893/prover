@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import { AaveEvidenceAdapter } from "../src/AaveEvidenceAdapter.sol";
+import { AaveEvidenceAdapter, NativeAaveEvidenceAdapter } from "../src/AaveEvidenceAdapter.sol";
 import { PerformanceBureau } from "../src/PerformanceBureau.sol";
 import { PolicyV1 } from "../src/PolicyV1.sol";
 import { AttestcoinProofAdapter } from "../src/attestcoin/AttestcoinProofAdapter.sol";
@@ -334,6 +334,12 @@ contract AaveEvidenceAdapterTest is TestBase {
     function test_ConstructorRejectsZeroBureau() public {
         vm.expectRevert(AaveEvidenceAdapter.ZeroAddress.selector);
         new AaveEvidenceAdapter(verifier, PerformanceBureau(address(0)));
+    }
+
+    function test_ProductionAdapterPinsCreditcoinNativeVerifier() public {
+        NativeAaveEvidenceAdapter nativeAdapter = new NativeAaveEvidenceAdapter(bureau);
+        assertEq(address(nativeAdapter.VERIFIER()), 0x0000000000000000000000000000000000000FD2);
+        assertEq(address(nativeAdapter.PERFORMANCE_BUREAU()), address(bureau));
     }
 
     function _ingestBorrow(
