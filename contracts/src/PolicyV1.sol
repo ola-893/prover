@@ -12,7 +12,7 @@ library PolicyV1 {
     uint256 internal constant BASE_COLLATERAL_BPS = 15_000;
     uint256 internal constant MIN_COLLATERAL_BPS = 10_000;
     uint256 internal constant MAX_COLLATERAL_BPS = 20_000;
-    uint256 internal constant CYCLE_DISCOUNT_BPS = 1_000;
+    uint256 internal constant SELF_REPAYMENT_OBSERVATION_DISCOUNT_BPS = 500;
     uint256 internal constant LIQUIDATION_SURCHARGE_BPS = 1_500;
     uint256 internal constant BREACH_SURCHARGE_BPS = 500;
 
@@ -28,28 +28,30 @@ library PolicyV1 {
     uint256 internal constant MAX_BOND_MULTIPLIER_BPS = 100_000;
 
     uint256 internal constant BASE_BORROW_USDC = 100 * USDC;
-    uint256 internal constant MAX_BORROW_USDC = 10_000 * USDC;
+    uint256 internal constant MAX_BORROW_USDC = 1_000 * USDC;
+    uint256 internal constant OBSERVED_BORROW_UPLIFT_BPS = 100;
     uint256 internal constant LIQUIDATION_LIMIT_PENALTY_BPS = 2_500;
     uint256 internal constant BREACH_LIMIT_PENALTY_BPS = 1_000;
     uint256 internal constant MAX_LIMIT_PENALTY_BPS = 7_500;
 
-    uint256 internal constant REASON_AAVE_CYCLE = 1 << 0;
+    uint256 internal constant REASON_AAVE_SELF_REPAYMENT_OBSERVATION = 1 << 0;
     uint256 internal constant REASON_LIQUIDATION = 1 << 1;
     uint256 internal constant REASON_ORDERING_BREACH = 1 << 2;
     uint256 internal constant REASON_UNCOMPENSATED = 1 << 3;
 
     /// @notice Verified facts attached to one EVM address.
-    /// @dev `maxMatchedUsdc` is the largest amount in a separately verified Aave borrow -> later
-    ///      repay pair. It is not a claim about current debt or complete credit history.
+    /// @dev `largestObservedBorrowUsdc` is the Borrow amount in the largest separately verified
+    ///      Aave Borrow + later same-address Repay observation. It is not a claim about a linked
+    ///      loan, current debt, timeliness, liquidation absence, or complete credit history.
     struct Profile {
         uint32 aaveBorrowFacts;
         uint32 aaveRepayFacts;
-        uint32 matchedAaveCycles;
-        uint32 liquidations;
+        uint32 aaveSelfRepaymentObservations;
+        uint32 aaveLiquidationFacts;
         uint32 sandwichBreaches;
         uint32 fifoBreaches;
         uint32 uncompensatedBreaches;
-        uint128 maxMatchedUsdc;
+        uint128 largestObservedBorrowUsdc;
         uint128 totalSlashedCtc;
     }
 
@@ -70,19 +72,26 @@ library PolicyV1 {
     }
 
     /// @notice Computes all product terms from an address's verified facts.
+    /// @dev Policy V1 is an experimental hackathon policy, not actuarially calibrated. Any number
+    ///      of self-repayment observations receives at most one five-percentage-point collateral
+    ///      discount, while the capacity uplift is one percent of the largest referenced Borrow
+    ///      and the entire limit is capped at 1,000 USDC. Recorded liquidation facts are positive
+    ///      inclusions only; a zero count does not establish liquidation absence.
     function quote(Profile memory profile) internal pure returns (Terms memory terms) {
-        uint256 cycles = _min(uint256(profile.matchedAaveCycles), 3);
+        bool hasSelfRepaymentObservation = profile.aaveSelfRepaymentObservations != 0;
         uint256 breaches = uint256(profile.sandwichBreaches) + uint256(profile.fifoBreaches);
 
-        uint256 collateral = BASE_COLLATERAL_BPS - cycles * CYCLE_DISCOUNT_BPS + uint256(profile.liquidations)
+        uint256 observationDiscount = hasSelfRepaymentObservation ? SELF_REPAYMENT_OBSERVATION_DISCOUNT_BPS : 0;
+        uint256 collateral = BASE_COLLATERAL_BPS - observationDiscount + uint256(profile.aaveLiquidationFacts)
             * LIQUIDATION_SURCHARGE_BPS + breaches * BREACH_SURCHARGE_BPS;
         collateral = _clamp(collateral, MIN_COLLATERAL_BPS, MAX_COLLATERAL_BPS);
 
-        uint256 capacity = BASE_BORROW_USDC + uint256(profile.maxMatchedUsdc) / 4;
+        uint256 capacity =
+            BASE_BORROW_USDC + uint256(profile.largestObservedBorrowUsdc) * OBSERVED_BORROW_UPLIFT_BPS / 10_000;
         capacity = _min(capacity, MAX_BORROW_USDC);
 
         uint256 limitPenalty =
-            uint256(profile.liquidations) * LIQUIDATION_LIMIT_PENALTY_BPS + breaches * BREACH_LIMIT_PENALTY_BPS;
+            uint256(profile.aaveLiquidationFacts) * LIQUIDATION_LIMIT_PENALTY_BPS + breaches * BREACH_LIMIT_PENALTY_BPS;
         limitPenalty = _min(limitPenalty, MAX_LIMIT_PENALTY_BPS);
         uint256 maxBorrow = capacity * (10_000 - limitPenalty) / 10_000;
 
@@ -95,13 +104,13 @@ library PolicyV1 {
         bondMultiplier = _min(bondMultiplier, MAX_BOND_MULTIPLIER_BPS);
 
         uint256 reasons;
-        if (cycles != 0) reasons |= REASON_AAVE_CYCLE;
-        if (profile.liquidations != 0) reasons |= REASON_LIQUIDATION;
+        if (hasSelfRepaymentObservation) reasons |= REASON_AAVE_SELF_REPAYMENT_OBSERVATION;
+        if (profile.aaveLiquidationFacts != 0) reasons |= REASON_LIQUIDATION;
         if (breaches != 0) reasons |= REASON_ORDERING_BREACH;
         if (profile.uncompensatedBreaches != 0) reasons |= REASON_UNCOMPENSATED;
 
         // All five casts below are bounded immediately above: 20,000 collateral bps, 2,000 premium
-        // bps, 100,000 bond multiplier bps, 10,000e6 USDC and 1,000e18 CTC respectively.
+        // bps, 100,000 bond multiplier bps, 1,000e6 USDC and 1,000e18 CTC respectively.
         terms = Terms({
             // forge-lint: disable-next-line(unsafe-typecast)
             collateralBps: uint16(collateral),

@@ -21,14 +21,16 @@ contract PerformanceBureauTest is TestBase {
         vm.expectRevert(abi.encodeWithSelector(PerformanceBureau.NotOwner.selector, OTHER_REPORTER));
         bureau.setReporterPermissions(REPORTER, type(uint256).max);
 
-        uint256 cyclePermission = bureau.permissionFor(PerformanceBureau.EvidenceKind.AaveCycle);
-        bureau.setReporterPermissions(REPORTER, cyclePermission);
-        assertEq(bureau.reporterPermissions(REPORTER), cyclePermission);
+        uint256 observationPermission =
+            bureau.permissionFor(PerformanceBureau.EvidenceKind.AaveSelfRepaymentObservation);
+        bureau.setReporterPermissions(REPORTER, observationPermission);
+        assertEq(bureau.reporterPermissions(REPORTER), observationPermission);
     }
 
     function test_ReporterPermissionIsScopedByEvidenceKind() public {
-        uint256 cyclePermission = bureau.permissionFor(PerformanceBureau.EvidenceKind.AaveCycle);
-        bureau.setReporterPermissions(REPORTER, cyclePermission);
+        uint256 observationPermission =
+            bureau.permissionFor(PerformanceBureau.EvidenceKind.AaveSelfRepaymentObservation);
+        bureau.setReporterPermissions(REPORTER, observationPermission);
 
         vm.prank(REPORTER);
         vm.expectRevert(
@@ -42,40 +44,44 @@ contract PerformanceBureauTest is TestBase {
     }
 
     function test_EvidenceCanOnlyUpdateAProfileOnce() public {
-        _permit(REPORTER, PerformanceBureau.EvidenceKind.AaveCycle);
-        bytes32 evidenceId = keccak256("one-cycle");
+        _permit(REPORTER, PerformanceBureau.EvidenceKind.AaveSelfRepaymentObservation);
+        bytes32 evidenceId = keccak256("one-self-repayment-observation");
 
         vm.prank(REPORTER);
-        bureau.recordEvidence(SUBJECT, evidenceId, PerformanceBureau.EvidenceKind.AaveCycle, 4_000e6, false);
+        bureau.recordEvidence(
+            SUBJECT, evidenceId, PerformanceBureau.EvidenceKind.AaveSelfRepaymentObservation, 4_000e6, false
+        );
 
         vm.prank(REPORTER);
         vm.expectRevert(abi.encodeWithSelector(PerformanceBureau.EvidenceAlreadyRecorded.selector, evidenceId));
-        bureau.recordEvidence(SUBJECT, evidenceId, PerformanceBureau.EvidenceKind.AaveCycle, 4_000e6, false);
+        bureau.recordEvidence(
+            SUBJECT, evidenceId, PerformanceBureau.EvidenceKind.AaveSelfRepaymentObservation, 4_000e6, false
+        );
 
         PolicyV1.Profile memory profile = bureau.profileOf(SUBJECT);
-        assertEq(profile.matchedAaveCycles, 1);
-        assertEq(profile.maxMatchedUsdc, 4_000e6);
+        assertEq(profile.aaveSelfRepaymentObservations, 1);
+        assertEq(profile.largestObservedBorrowUsdc, 4_000e6);
     }
 
     function test_ProfileUpdatesAreKindSpecificAndRepriceTerms() public {
         uint256 mask = bureau.permissionFor(PerformanceBureau.EvidenceKind.AaveBorrow)
             | bureau.permissionFor(PerformanceBureau.EvidenceKind.AaveRepay)
-            | bureau.permissionFor(PerformanceBureau.EvidenceKind.AaveCycle)
+            | bureau.permissionFor(PerformanceBureau.EvidenceKind.AaveSelfRepaymentObservation)
             | bureau.permissionFor(PerformanceBureau.EvidenceKind.SandwichBreach)
             | bureau.permissionFor(PerformanceBureau.EvidenceKind.FifoBreach);
         bureau.setReporterPermissions(REPORTER, mask);
 
         _record(bytes32(uint256(1)), PerformanceBureau.EvidenceKind.AaveBorrow, 4_000e6, false);
         _record(bytes32(uint256(2)), PerformanceBureau.EvidenceKind.AaveRepay, 4_100e6, false);
-        _record(bytes32(uint256(3)), PerformanceBureau.EvidenceKind.AaveCycle, 4_000e6, false);
+        _record(bytes32(uint256(3)), PerformanceBureau.EvidenceKind.AaveSelfRepaymentObservation, 4_000e6, false);
 
-        PolicyV1.Profile memory afterCycle = bureau.profileOf(SUBJECT);
-        PolicyV1.Terms memory cycleTerms = bureau.termsOf(SUBJECT);
-        assertEq(afterCycle.aaveBorrowFacts, 1);
-        assertEq(afterCycle.aaveRepayFacts, 1);
-        assertEq(afterCycle.matchedAaveCycles, 1);
-        assertEq(cycleTerms.collateralBps, 14_000);
-        assertEq(cycleTerms.maxBorrowUsdc, 1_100e6);
+        PolicyV1.Profile memory afterObservation = bureau.profileOf(SUBJECT);
+        PolicyV1.Terms memory observationTerms = bureau.termsOf(SUBJECT);
+        assertEq(afterObservation.aaveBorrowFacts, 1);
+        assertEq(afterObservation.aaveRepayFacts, 1);
+        assertEq(afterObservation.aaveSelfRepaymentObservations, 1);
+        assertEq(observationTerms.collateralBps, 14_500);
+        assertEq(observationTerms.maxBorrowUsdc, 140e6);
 
         _record(bytes32(uint256(4)), PerformanceBureau.EvidenceKind.SandwichBreach, 10 ether, false);
         _record(bytes32(uint256(5)), PerformanceBureau.EvidenceKind.FifoBreach, 0, true);
@@ -86,21 +92,22 @@ contract PerformanceBureauTest is TestBase {
         assertEq(afterBreaches.fifoBreaches, 1);
         assertEq(afterBreaches.uncompensatedBreaches, 1);
         assertEq(afterBreaches.totalSlashedCtc, 10 ether);
-        assertEq(breachTerms.collateralBps, 15_000);
+        assertEq(breachTerms.collateralBps, 15_500);
         assertEq(breachTerms.premiumBps, 350);
         assertEq(breachTerms.minimumBondCtc, 250 ether);
-        assertEq(breachTerms.maxBorrowUsdc, 880e6);
+        assertEq(breachTerms.maxBorrowUsdc, 112e6);
     }
 
-    function test_LowerLaterCycleDoesNotReduceDemonstratedCapacity() public {
-        _permit(REPORTER, PerformanceBureau.EvidenceKind.AaveCycle);
-        _record(bytes32(uint256(1)), PerformanceBureau.EvidenceKind.AaveCycle, 4_000e6, false);
-        _record(bytes32(uint256(2)), PerformanceBureau.EvidenceKind.AaveCycle, 500e6, false);
+    function test_LowerLaterObservationDoesNotReduceDemonstratedCapacityOrStackDiscount() public {
+        _permit(REPORTER, PerformanceBureau.EvidenceKind.AaveSelfRepaymentObservation);
+        _record(bytes32(uint256(1)), PerformanceBureau.EvidenceKind.AaveSelfRepaymentObservation, 4_000e6, false);
+        _record(bytes32(uint256(2)), PerformanceBureau.EvidenceKind.AaveSelfRepaymentObservation, 500e6, false);
 
         PolicyV1.Profile memory profile = bureau.profileOf(SUBJECT);
-        assertEq(profile.matchedAaveCycles, 2);
-        assertEq(profile.maxMatchedUsdc, 4_000e6);
-        assertEq(bureau.termsOf(SUBJECT).collateralBps, 13_000);
+        assertEq(profile.aaveSelfRepaymentObservations, 2);
+        assertEq(profile.largestObservedBorrowUsdc, 4_000e6);
+        assertEq(bureau.termsOf(SUBJECT).collateralBps, 14_500);
+        assertEq(bureau.termsOf(SUBJECT).maxBorrowUsdc, 140e6);
     }
 
     function test_UncompensatedFlagOnlyAppliesToBreaches() public {
@@ -126,4 +133,3 @@ contract PerformanceBureauTest is TestBase {
         bureau.recordEvidence(SUBJECT, evidenceId, kind, value, uncompensated);
     }
 }
-

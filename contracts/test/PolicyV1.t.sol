@@ -29,21 +29,21 @@ contract PolicyV1Test is TestBase {
         assertEq(terms.reasonFlags, 0);
     }
 
-    function test_CycleDiscountCapsAtThreeCycles() public view {
+    function test_ObservationBenefitIsConservativeAndCapsAtOneObservation() public view {
         PolicyV1.Profile memory profile;
-        profile.matchedAaveCycles = 99;
-        profile.maxMatchedUsdc = 100_000e6;
+        profile.aaveSelfRepaymentObservations = 99;
+        profile.largestObservedBorrowUsdc = 100_000e6;
 
         PolicyV1.Terms memory terms = policy.quote(profile);
-        assertEq(terms.collateralBps, 12_000);
-        assertEq(terms.maxBorrowUsdc, 10_000e6);
+        assertEq(terms.collateralBps, 14_500);
+        assertEq(terms.maxBorrowUsdc, 1_000e6);
         assertTrue(terms.reasonFlags & 1 != 0);
     }
 
     function test_RiskTermsAreBoundedUnderExtremeNegativeEvidence() public view {
         PolicyV1.Profile memory profile;
-        profile.maxMatchedUsdc = 40_000e6;
-        profile.liquidations = type(uint32).max;
+        profile.largestObservedBorrowUsdc = 40_000e6;
+        profile.aaveLiquidationFacts = type(uint32).max;
         profile.sandwichBreaches = type(uint32).max;
         profile.fifoBreaches = type(uint32).max;
         profile.uncompensatedBreaches = type(uint32).max;
@@ -53,8 +53,7 @@ contract PolicyV1Test is TestBase {
         assertEq(terms.premiumBps, 2_000);
         assertEq(terms.bondMultiplierBps, 100_000);
         assertEq(terms.minimumBondCtc, 1_000 ether);
-        assertEq(terms.maxBorrowUsdc, 2_500e6);
+        assertEq(terms.maxBorrowUsdc, 125e6);
         assertEq(terms.reasonFlags, 14);
     }
 }
-

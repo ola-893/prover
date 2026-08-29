@@ -13,7 +13,7 @@ contract PerformanceBureau {
     enum EvidenceKind {
         AaveBorrow,
         AaveRepay,
-        AaveCycle,
+        AaveSelfRepaymentObservation,
         AaveLiquidation,
         SandwichBreach,
         FifoBreach
@@ -115,8 +115,8 @@ contract PerformanceBureau {
     }
 
     /// @notice Applies one verified fact to a subject's profile exactly once.
-    /// @param value A cycle's matched USDC amount, or CTC actually slashed for a breach.
-    ///              Raw borrow/repay/liquidation facts may carry informational values.
+    /// @param value An observation's referenced Borrow amount, or CTC actually slashed for a
+    ///              breach. Raw borrow/repay/liquidation facts may carry informational values.
     function recordEvidence(address subject, bytes32 evidenceId, EvidenceKind kind, uint128 value, bool uncompensated)
         external
     {
@@ -129,7 +129,9 @@ contract PerformanceBureau {
         if (_evidence[evidenceId].reporter != address(0)) revert EvidenceAlreadyRecorded(evidenceId);
 
         bool isBreach = kind == EvidenceKind.SandwichBreach || kind == EvidenceKind.FifoBreach;
-        if (kind == EvidenceKind.AaveCycle && value == 0) revert InvalidEvidenceValue(kind, value);
+        if (kind == EvidenceKind.AaveSelfRepaymentObservation && value == 0) {
+            revert InvalidEvidenceValue(kind, value);
+        }
         if (uncompensated && !isBreach) revert InvalidUncompensatedFlag(kind);
 
         PolicyV1.Profile storage profile = _profiles[subject];
@@ -139,11 +141,11 @@ contract PerformanceBureau {
             ++profile.aaveBorrowFacts;
         } else if (kind == EvidenceKind.AaveRepay) {
             ++profile.aaveRepayFacts;
-        } else if (kind == EvidenceKind.AaveCycle) {
-            ++profile.matchedAaveCycles;
-            if (value > profile.maxMatchedUsdc) profile.maxMatchedUsdc = value;
+        } else if (kind == EvidenceKind.AaveSelfRepaymentObservation) {
+            ++profile.aaveSelfRepaymentObservations;
+            if (value > profile.largestObservedBorrowUsdc) profile.largestObservedBorrowUsdc = value;
         } else if (kind == EvidenceKind.AaveLiquidation) {
-            ++profile.liquidations;
+            ++profile.aaveLiquidationFacts;
         } else if (kind == EvidenceKind.SandwichBreach) {
             ++profile.sandwichBreaches;
             profile.totalSlashedCtc += value;

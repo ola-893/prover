@@ -125,7 +125,7 @@ contract DemoLender {
         }
 
         uint256 collateral = uint256(principalUsdc) * USDC_TO_CTC_WEI * terms.collateralBps / 10_000;
-        // The principal is capped at 10,000e6 and collateral at 200%, so this is at most 20,000e18.
+        // The principal is capped at 1,000e6 and collateral at 200%, so this is at most 2,000e18.
         // forge-lint: disable-next-line(unsafe-typecast)
         requiredCollateralCtc = uint128(collateral);
     }

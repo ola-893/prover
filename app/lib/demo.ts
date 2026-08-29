@@ -3,21 +3,26 @@ export type ActorKey = 'borrower' | 'relay' | 'vault';
 export type EvidenceKind =
   | 'AAVE_BORROW'
   | 'AAVE_REPAY'
-  | 'AAVE_CYCLE'
+  | 'AAVE_SELF_REPAYMENT_OBSERVATION'
   | 'SANDWICH_BREACH'
   | 'FIFO_BREACH';
 
-export type EvidenceMode = 'attestcoin' | 'captured-live' | 'fixture';
+export type EvidenceMode =
+  | 'attestcoin'
+  | 'captured-live'
+  | 'fixture'
+  | 'derived';
 
 export interface PerformanceProfile {
   aaveBorrowFacts: number;
   aaveRepayFacts: number;
-  matchedAaveCycles: number;
-  liquidations: number;
+  aaveSelfRepaymentObservations: number;
+  aaveLiquidationFacts: number;
+  liquidationCoverage: 'not-checked';
   sandwichBreaches: number;
   fifoBreaches: number;
   uncompensatedBreaches: number;
-  maxMatchedUsdc: number;
+  largestObservedBorrowUsdc: number;
   totalSlashedCtc: number;
 }
 
@@ -55,12 +60,15 @@ export interface DemoStep {
   actor: ActorKey | 'all';
 }
 
-export const actors: Record<ActorKey, {
-  name: string;
-  role: string;
-  address: string;
-  accent: string;
-}> = {
+export const actors: Record<
+  ActorKey,
+  {
+    name: string;
+    role: string;
+    address: string;
+    accent: string;
+  }
+> = {
   borrower: {
     name: 'Aave borrower',
     role: 'Ethereum wallet',
@@ -86,42 +94,48 @@ export const demoSteps: DemoStep[] = [
     number: 1,
     short: 'Import',
     title: 'Import Aave facts',
-    description: 'Authenticate one Borrow and one later Repay receipt from Ethereum.',
+    description:
+      'Authenticate one Borrow and one later Repay receipt from Ethereum.',
     actor: 'borrower',
   },
   {
     number: 2,
     short: 'Profile',
     title: 'Build the evidence vector',
-    description: 'Attribute both facts to the debt owner encoded by the Aave events.',
+    description:
+      'Attribute two source facts, then derive one narrowly defined self-repayment observation.',
     actor: 'borrower',
   },
   {
     number: 3,
     short: 'Offer',
     title: 'Reprice a Creditcoin offer',
-    description: 'Policy V1 discounts collateral and exposes the exact reason code.',
+    description:
+      'Experimental Policy V1 applies a bounded benefit and exposes the exact reason code.',
     actor: 'borrower',
   },
   {
     number: 4,
     short: 'Relay bond',
     title: 'Bind a no-sandwich covenant',
-    description: 'The relay locks CTC behind a forward-looking coverage window.',
+    description:
+      'The relay locks CTC behind a forward-looking coverage window.',
     actor: 'relay',
   },
   {
     number: 5,
     short: 'Sandwich',
     title: 'Rule on a sandwich',
-    description: 'Three authenticated positions prove front-run < victim < back-run.',
+    description:
+      'Three authenticated positions prove front-run < victim < back-run.',
     actor: 'relay',
   },
   {
     number: 6,
     short: 'Vault bond',
     title: 'Bind a FIFO covenant',
-    description: 'The vault operator bonds its promise to process exits in request order.',
+    description:
+      'The vault operator bonds its promise to process exits in request order.',
     actor: 'vault',
   },
   {
@@ -135,7 +149,8 @@ export const demoSteps: DemoStep[] = [
     number: 8,
     short: 'Reprice',
     title: 'Reprice every future promise',
-    description: 'Limits, premiums and minimum bonds update from the same public record.',
+    description:
+      'Limits, premiums and minimum bonds update from the same public record.',
     actor: 'all',
   },
 ];
@@ -151,7 +166,8 @@ export const evidenceRecords: EvidenceRecord[] = [
     proof: 'fresh Attestcoin proof required',
     mode: 'fixture',
     visibleAt: 1,
-    detail: 'Debt owner is decoded from indexed onBehalfOf—not inferred from tx.from.',
+    detail:
+      'Debt owner is decoded from indexed onBehalfOf—not inferred from tx.from.',
   },
   {
     id: '0x84ea…ba344',
@@ -163,19 +179,21 @@ export const evidenceRecords: EvidenceRecord[] = [
     proof: 'fresh Attestcoin proof required',
     mode: 'fixture',
     visibleAt: 1,
-    detail: 'Beneficiary is decoded from indexed user; a third party may be the repayer.',
+    detail:
+      'Repay.user and Repay.repayer both resolve to the same wallet in this source event.',
   },
   {
     id: '0xf11e…77c2',
-    kind: 'AAVE_CYCLE',
+    kind: 'AAVE_SELF_REPAYMENT_OBSERVATION',
     subject: 'borrower',
-    title: 'Debt opened → later self-reduction',
+    title: 'Self-repayment observation',
     source: 'Performance Bureau',
     coordinate: '40 authenticated source blocks apart',
-    proof: 'two authenticated facts',
-    mode: 'fixture',
+    proof: 'derived from two authenticated facts',
+    mode: 'derived',
     visibleAt: 2,
-    detail: 'This real source pair is a proof candidate—not a claim that Aave debt was fully closed.',
+    detail:
+      'Derived from an authenticated Borrow plus a later same-address Repay for the same reserve and a same-or-larger amount. It does not prove loan closure, current balance, timeliness or complete history.',
   },
   {
     id: '0x19d4…41a0',
@@ -187,7 +205,8 @@ export const evidenceRecords: EvidenceRecord[] = [
     proof: 'three transaction proofs',
     mode: 'fixture',
     visibleAt: 5,
-    detail: 'The product fixture uses a fixed 50 CTC penalty; no invented ETH/CTC price.',
+    detail:
+      'The product fixture uses a fixed 50 CTC penalty; no invented ETH/CTC price.',
   },
   {
     id: '0x771a…be04',
@@ -199,19 +218,21 @@ export const evidenceRecords: EvidenceRecord[] = [
     proof: 'four transaction proofs',
     mode: 'fixture',
     visibleAt: 7,
-    detail: 'Completed reverse processing is positive evidence; no pending-state claim is needed.',
+    detail:
+      'Completed reverse processing is positive evidence; no pending-state claim is needed.',
   },
 ];
 
 export const emptyProfile: PerformanceProfile = {
   aaveBorrowFacts: 0,
   aaveRepayFacts: 0,
-  matchedAaveCycles: 0,
-  liquidations: 0,
+  aaveSelfRepaymentObservations: 0,
+  aaveLiquidationFacts: 0,
+  liquidationCoverage: 'not-checked',
   sandwichBreaches: 0,
   fifoBreaches: 0,
   uncompensatedBreaches: 0,
-  maxMatchedUsdc: 0,
+  largestObservedBorrowUsdc: 0,
   totalSlashedCtc: 0,
 };
 
@@ -221,8 +242,8 @@ export function profileAt(actor: ActorKey, step: number): PerformanceProfile {
   if (actor === 'borrower' && step >= 2) {
     profile.aaveBorrowFacts = 1;
     profile.aaveRepayFacts = 1;
-    profile.matchedAaveCycles = 1;
-    profile.maxMatchedUsdc = 90_000;
+    profile.aaveSelfRepaymentObservations = 1;
+    profile.largestObservedBorrowUsdc = 90_000;
   }
 
   if (actor === 'relay' && step >= 5) {
@@ -239,34 +260,56 @@ export function profileAt(actor: ActorKey, step: number): PerformanceProfile {
 }
 
 export function termsFor(profile: PerformanceProfile): Terms {
-  const cycles = Math.min(profile.matchedAaveCycles, 3);
+  const hasSelfRepaymentObservation = profile.aaveSelfRepaymentObservations > 0;
   const breaches = profile.sandwichBreaches + profile.fifoBreaches;
   const collateralBps = clamp(
-    15_000 - cycles * 1_000 + profile.liquidations * 1_500 + breaches * 500,
+    15_000 -
+      (hasSelfRepaymentObservation ? 500 : 0) +
+      profile.aaveLiquidationFacts * 1_500 +
+      breaches * 500,
     10_000,
     20_000,
   );
-  const capacity = Math.min(100 + profile.maxMatchedUsdc / 4, 10_000);
+  const capacity = Math.min(
+    100 +
+      (hasSelfRepaymentObservation
+        ? profile.largestObservedBorrowUsdc / 100
+        : 0),
+    1_000,
+  );
   const limitPenaltyBps = Math.min(
-    profile.liquidations * 2_500 + breaches * 1_000,
+    profile.aaveLiquidationFacts * 2_500 + breaches * 1_000,
     7_500,
   );
-  const maxBorrowUsdc = Math.floor(capacity * (10_000 - limitPenaltyBps) / 10_000);
+  const maxBorrowUsdc = Math.floor(
+    (capacity * (10_000 - limitPenaltyBps)) / 10_000,
+  );
   const premiumBps = Math.min(
     50 + breaches * 100 + profile.uncompensatedBreaches * 100,
     2_000,
   );
-  const minimumBondCtc = 100
-    * (10_000 + breaches * 5_000 + profile.uncompensatedBreaches * 5_000)
-    / 10_000;
+  const minimumBondCtc =
+    (100 *
+      (10_000 + breaches * 5_000 + profile.uncompensatedBreaches * 5_000)) /
+    10_000;
   const reasons: Terms['reasons'] = [];
 
-  if (cycles > 0) {
+  if (hasSelfRepaymentObservation) {
     reasons.push({
-      code: 'AAVE_CYCLE_DISCOUNT',
-      label: `${cycles} verified borrow→later-repay cycle`,
-      effect: `−${cycles * 10}% collateral`,
+      code: 'AAVE_SELF_REPAYMENT_OBSERVATION',
+      label:
+        'Authenticated Borrow plus later same-address Repay of a same-or-larger amount',
+      effect:
+        '−5 percentage points collateral · +1% of observed amount, $1,000 total limit cap',
       tone: 'positive',
+    });
+  }
+  if (profile.aaveLiquidationFacts > 0) {
+    reasons.push({
+      code: 'AAVE_LIQUIDATION_PROOF_SURCHARGE',
+      label: `${profile.aaveLiquidationFacts} imported Aave liquidation proof${profile.aaveLiquidationFacts === 1 ? '' : 's'}`,
+      effect: '+15 percentage points collateral · −25% capacity per proof',
+      tone: 'negative',
     });
   }
   if (profile.sandwichBreaches > 0) {
