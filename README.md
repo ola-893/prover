@@ -66,6 +66,23 @@ height checks use ChainInfo at `0x…0FD3`. The production ordering deployer pin
 vendored EVM decoder requires the canonical CC3 library at
 `0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f` when deploying linked production bytecode.
 
+## Live CC3 testnet deployment
+
+The court infrastructure is deployed on Creditcoin CC3 testnet (chain ID `102031`):
+
+| Contract | Address |
+| --- | --- |
+| Ordering Court | [`0xc01f7E27D4D712241B1cAAD972E0FC589146c5Ff`](https://creditcoin-testnet.blockscout.com/address/0xc01f7E27D4D712241B1cAAD972E0FC589146c5Ff) |
+| Covenant Book | [`0x66aF3e9Ad07A236b29de7ad07083C037a4244223`](https://creditcoin-testnet.blockscout.com/address/0x66aF3e9Ad07A236b29de7ad07083C037a4244223) |
+| Performance Bureau | [`0x8Ef418F6E740950cAd8C4fa22A4F7B7990B00D74`](https://creditcoin-testnet.blockscout.com/address/0x8Ef418F6E740950cAd8C4fa22A4F7B7990B00D74) |
+| Native Aave Evidence Adapter | [`0xDff00fde3829fFcA7A1dCAB0AA30602dd9F380A4`](https://creditcoin-testnet.blockscout.com/address/0xDff00fde3829fFcA7A1dCAB0AA30602dd9F380A4) |
+| Demo Lender | [`0xb6A6858C7BBb755c2AD014d07583369278078F71`](https://creditcoin-testnet.blockscout.com/address/0xb6A6858C7BBb755c2AD014d07583369278078F71) |
+
+The sanitized [deployment manifest](./contracts/deployments/cc3-testnet.json) records transaction
+hashes, runtime code hashes, child wiring, dependency addresses and reporter masks. Deployment proves
+the infrastructure is live; it does not turn browser fixtures into live Attestcoin verdicts. A live
+proof-builder payload and successful `verifyAndEmit` transaction remain separate integration work.
+
 ## Exactly what the predicates establish
 
 ### No-sandwich ruling
@@ -139,7 +156,7 @@ Validation used by CI:
 cd contracts
 forge fmt --check
 forge test
-forge build --sizes
+forge build --sizes --skip script
 
 cd ../app
 npx oxlint app/page.tsx components/performance-demo.tsx lib/demo.ts app/layout.tsx

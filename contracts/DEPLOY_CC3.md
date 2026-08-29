@@ -14,16 +14,8 @@ Never put a private key in a command argument, committed file, deployment manife
 history. `DeployCc3Mvp.s.sol` reads `CREDITCOIN_PRIVATE_KEY` from the current process environment.
 The committed `.env.example` contains names and public endpoints only.
 
-In a fresh `zsh` session, load the key without echoing it or putting its value in shell history:
-
-```sh
-read -r -s "CREDITCOIN_PRIVATE_KEY?CC3 private key: "
-print
-export CREDITCOIN_PRIVATE_KEY
-```
-
-Run the deployment in that same session, then immediately run
-`unset CREDITCOIN_PRIVATE_KEY`.
+Prefer Foundry's `--interactive` signer prompt for direct deployments. It reads the key without
+putting the value in the command line, environment, repository or shell history.
 
 Rotate any credential that has been pasted into a chat or terminal transcript before a production
 deployment. The current deployment is testnet-only.
@@ -37,20 +29,61 @@ deployment. The current deployment is testnet-only.
 - Canonical decoder runtime code hash:
   `0xb549c9d8eaf7d361192f8e363fe98717464441e2dd26e2b3bd1e0725df73a065`
 
-The script rejects the wrong CC3 chain or a changed decoder code hash. The canonical decoder must
-also be linked explicitly:
+`DeployCc3Mvp.s.sol` is the declarative deployment and wiring specification. It rejects the wrong
+chain or a changed decoder code hash. Creditcoin's raw CC3 HTTP response currently omits the
+`mixHash`/`prevRandao` field that Foundry 1.5 expects when building a fork, so `forge script` stops at
+header validation against that endpoint before broadcasting. Until the RPC normalizes that header,
+use direct `forge create`/`cast send` calls; they estimate and submit transactions without creating a
+fork.
+
+Set only public shell variables:
 
 ```sh
-forge script script/DeployCc3Mvp.s.sol:DeployCc3Mvp \
-  --rpc-url "$CREDITCOIN_RPC_URL" \
-  --chain-id 102031 \
-  --libraries "src/attestcoin/EvmV1Decoder.sol:EvmV1Decoder:0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f" \
-  --broadcast --slow --non-interactive
+RPC=https://rpc.cc3-testnet.creditcoin.network
+DECODER=0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f
 ```
 
-Run from `contracts/`. Simulate first by omitting `--broadcast`. After broadcasting, verify the
-deployed bytecode, ownership, native dependency addresses, and reporter masks against the chain
-before publishing a deployment manifest.
+Deploy the bureau and copy its public address from Foundry's output:
+
+```sh
+forge create --rpc-url "$RPC" --chain 102031 --interactive --broadcast \
+  src/PerformanceBureau.sol:PerformanceBureau
+
+BUREAU=<deployed PerformanceBureau address>
+```
+
+Deploy the linked court system and native Aave adapter. `--constructor-args` is deliberately last
+because it consumes every remaining command argument:
+
+```sh
+forge create --libraries "src/attestcoin/EvmV1Decoder.sol:EvmV1Decoder:$DECODER" \
+  --rpc-url "$RPC" --chain 102031 --interactive --broadcast \
+  src/NativeOrderingCourtDeployer.sol:NativeOrderingCourtDeployer \
+  --constructor-args "$BUREAU"
+
+forge create --libraries "src/attestcoin/EvmV1Decoder.sol:EvmV1Decoder:$DECODER" \
+  --rpc-url "$RPC" --chain 102031 --interactive --broadcast \
+  src/AaveEvidenceAdapter.sol:NativeAaveEvidenceAdapter \
+  --constructor-args "$BUREAU"
+
+forge create --rpc-url "$RPC" --chain 102031 --interactive --broadcast \
+  src/DemoLender.sol:DemoLender --constructor-args "$BUREAU"
+```
+
+Read `COVENANT_BOOK()` and `ORDERING_COURT()` from the system deployer, then grant exactly the two
+least-privilege masks:
+
+```sh
+cast send --rpc-url "$RPC" --chain 102031 --interactive "$BUREAU" \
+  'setReporterPermissions(address,uint256)' "$ORDERING_COURT" 48
+
+cast send --rpc-url "$RPC" --chain 102031 --interactive "$BUREAU" \
+  'setReporterPermissions(address,uint256)' "$AAVE_ADAPTER" 7
+```
+
+Run from `contracts/`. Dry-run each `forge create` first by supplying `--from` with the public
+deployer address and omitting `--broadcast`. After broadcasting, verify the deployed bytecode,
+ownership, native dependency addresses, and reporter masks before publishing a manifest.
 
 ## Testnet authority
 

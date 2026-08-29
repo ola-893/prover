@@ -1,6 +1,7 @@
 import {
   ArrowDown,
   ArrowRight,
+  ExternalLink,
   Gavel,
   GitCompareArrows,
   ShieldCheck,
@@ -9,13 +10,18 @@ import {
 import { PerformanceDemo } from '@/components/performance-demo';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
+import { cc3AddressUrl, cc3Deployment, shortAddress } from '@/lib/deployment';
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#091511] text-white">
       <header className="sticky top-0 z-50 border-b border-white/8 bg-[#091511]/88 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1500px] items-center justify-between px-4 sm:px-7 lg:px-10">
-          <a href="#top" className="flex items-center gap-3" aria-label="Prover home">
+          <a
+            href="#top"
+            className="flex items-center gap-3"
+            aria-label="Prover home"
+          >
             <span className="grid size-9 place-items-center rounded-xl bg-[#b8f34a] text-[#0a1712]">
               <ShieldCheck className="size-5" strokeWidth={2.5} />
             </span>
@@ -28,51 +34,86 @@ export default function Home() {
           </a>
 
           <div className="hidden items-center gap-7 text-xs text-white/50 md:flex">
-            <a className="transition hover:text-white" href="#order-proofs">Order proofs</a>
-            <a className="transition hover:text-white" href="#court">Live docket</a>
-            <a className="transition hover:text-white" href="#consequence">Financial consequence</a>
+            <a className="transition hover:text-white" href="#order-proofs">
+              Order proofs
+            </a>
+            <a className="transition hover:text-white" href="#deployment">
+              CC3 deployment
+            </a>
+            <a className="transition hover:text-white" href="#court">
+              Evidence demo
+            </a>
+            <a className="transition hover:text-white" href="#consequence">
+              Financial consequence
+            </a>
           </div>
 
-          <Badge className="border border-[#b8f34a]/20 bg-[#b8f34a]/10 text-[#c9fa72]">
-            Built on Attestcoin
-          </Badge>
+          <a
+            href={cc3AddressUrl(cc3Deployment.contracts[0].address)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Badge className="border border-[#b8f34a]/20 bg-[#b8f34a]/10 text-[#c9fa72]">
+              CC3 court deployed <ExternalLink className="size-3" />
+            </Badge>
+          </a>
         </div>
       </header>
 
-      <section id="top" className="relative overflow-hidden border-b border-white/8 px-4 pb-20 pt-16 sm:px-7 sm:pb-28 sm:pt-24 lg:px-10">
+      <section
+        id="top"
+        className="relative overflow-hidden border-b border-white/8 px-4 pb-20 pt-16 sm:px-7 sm:pb-28 sm:pt-24 lg:px-10"
+      >
         <div
           aria-hidden="true"
           className="absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,.035)_1px,transparent_1px)] [background-size:44px_44px]"
         />
-        <div aria-hidden="true" className="absolute -right-48 -top-48 size-[580px] rounded-full bg-[#b8f34a]/10 blur-[110px]" />
-        <div aria-hidden="true" className="absolute -bottom-64 -left-32 size-[520px] rounded-full bg-[#2a6b51]/20 blur-[100px]" />
+        <div
+          aria-hidden="true"
+          className="absolute -right-48 -top-48 size-[580px] rounded-full bg-[#b8f34a]/10 blur-[110px]"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute -bottom-64 -left-32 size-[520px] rounded-full bg-[#2a6b51]/20 blur-[100px]"
+        />
 
         <div className="relative mx-auto max-w-[1500px]">
           <div className="grid items-end gap-12 xl:grid-cols-[0.88fr_1.12fr]">
             <div className="max-w-3xl">
               <Badge className="mb-5 border border-white/10 bg-white/[0.045] text-[#c9fa72]">
-                <GitCompareArrows className="size-3" /> Merkle laterality becomes evidence
+                <GitCompareArrows className="size-3" /> Merkle laterality
+                becomes evidence
               </Badge>
               <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.06em] sm:text-6xl lg:text-[76px]">
                 Prove the order.
-                <span className="block text-[#b8f34a]">Enforce the promise.</span>
+                <span className="block text-[#b8f34a]">
+                  Enforce the promise.
+                </span>
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-7 text-white/55 sm:text-lg sm:leading-8">
-                A Merkle-order proof exposes a relay sandwich. FairExit exposes a vault queue inversion.
-                The transaction payload never says “I was first”—the Merkle path does.
+                A Merkle-order proof exposes a relay sandwich. FairExit exposes
+                a vault queue inversion. The transaction payload never says “I
+                was first”—the Merkle path does.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
                 <a
                   href="#order-proofs"
-                  className={buttonVariants({ className: 'h-11 rounded-xl bg-[#b8f34a] px-4 text-[#0a1712] hover:bg-[#d0ff78]' })}
+                  className={buttonVariants({
+                    className:
+                      'h-11 rounded-xl bg-[#b8f34a] px-4 text-[#0a1712] hover:bg-[#d0ff78]',
+                  })}
                 >
                   Inspect both verdicts
                   <ArrowDown className="size-4" />
                 </a>
                 <a
                   href="#court"
-                  className={buttonVariants({ variant: 'outline', className: 'h-11 rounded-xl border-white/12 bg-white/[0.035] px-4 text-white hover:bg-white/10 hover:text-white' })}
+                  className={buttonVariants({
+                    variant: 'outline',
+                    className:
+                      'h-11 rounded-xl border-white/12 bg-white/[0.035] px-4 text-white hover:bg-white/10 hover:text-white',
+                  })}
                 >
                   Open the evidence court
                   <ArrowRight className="size-4" />
@@ -98,23 +139,80 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="consequence" className="border-b border-white/8 bg-[#0d1d17] px-4 py-5 sm:px-7 lg:px-10">
+      <LiveDeployment />
+
+      <section
+        id="consequence"
+        className="border-b border-white/8 bg-[#0d1d17] px-4 py-5 sm:px-7 lg:px-10"
+      >
         <div className="mx-auto flex max-w-[1500px] flex-col justify-between gap-3 md:flex-row md:items-center">
           <div className="flex items-center gap-3">
             <span className="grid size-8 place-items-center rounded-lg bg-[#b8f34a]/10 text-[#b8f34a]">
               <Gavel className="size-4" />
             </span>
-            <p className="text-sm font-medium">The ruling is the product. Credit is one consequence.</p>
+            <p className="text-sm font-medium">
+              The ruling is the product. Credit is one consequence.
+            </p>
           </div>
           <p className="max-w-2xl text-xs leading-5 text-white/40">
-            A proven breach follows the operator into future borrowing limits, premiums and bond requirements;
-            verified Aave performance uses the same transparent record without becoming another opaque score.
+            A proven breach follows the operator into future borrowing limits,
+            premiums and bond requirements; verified Aave performance uses the
+            same transparent record without becoming another opaque score.
           </p>
         </div>
       </section>
 
       <PerformanceDemo />
     </main>
+  );
+}
+
+function LiveDeployment() {
+  return (
+    <section
+      id="deployment"
+      className="scroll-mt-16 border-b border-white/8 bg-[#0b1914] px-4 py-7 sm:px-7 lg:px-10"
+    >
+      <div className="mx-auto grid max-w-[1500px] gap-5 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+        <div>
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] text-[#b8f34a]">
+            <span className="size-2 rounded-full bg-[#b8f34a] shadow-[0_0_12px_#b8f34a]" />
+            Contracts live · chain {cc3Deployment.chainId}
+          </div>
+          <h2 className="mt-2 text-xl font-semibold tracking-[-0.025em]">
+            The court infrastructure is deployed on CC3 testnet.
+          </h2>
+          <p className="mt-2 max-w-xl text-xs leading-5 text-white/42">
+            Native verifier and ChainInfo wiring, factory children, decoder
+            link, ownership and least-privilege reporter masks were checked
+            on-chain. The browser verdicts remain labeled fixtures until live
+            proof payloads are submitted.
+          </p>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          {cc3Deployment.contracts.map((contract) => (
+            <a
+              key={contract.address}
+              href={cc3AddressUrl(contract.address)}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.035] px-3.5 py-3 transition hover:border-[#b8f34a]/25 hover:bg-white/[0.065]"
+            >
+              <span>
+                <span className="block text-[11px] font-semibold text-white/72">
+                  {contract.label}
+                </span>
+                <span className="mt-1 block font-mono text-[9px] text-white/30">
+                  {shortAddress(contract.address)}
+                </span>
+              </span>
+              <ExternalLink className="size-3.5 text-white/25 transition group-hover:text-[#b8f34a]" />
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -125,11 +223,17 @@ function SandwichFlagship() {
         <div>
           <div className="mb-2 flex items-center gap-2">
             <span className="size-2 rounded-full bg-[#ff9f67] shadow-[0_0_12px_#ff9f67]" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#ffb389]">Sandwich verdict</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#ffb389]">
+              Sandwich verdict
+            </span>
           </div>
-          <h2 className="text-xl font-semibold tracking-[-0.025em]">No-sandwich covenant broken</h2>
+          <h2 className="text-xl font-semibold tracking-[-0.025em]">
+            No-sandwich covenant broken
+          </h2>
         </div>
-        <Badge className="bg-[#ff9f67]/12 text-[#ffb389]">3 proofs · 1 block</Badge>
+        <Badge className="bg-[#ff9f67]/12 text-[#ffb389]">
+          3 proofs · 1 block
+        </Badge>
       </div>
 
       <div className="mt-5 grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-2">
@@ -141,8 +245,12 @@ function SandwichFlagship() {
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/8 pt-4">
-        <p className="font-mono text-[10px] text-white/38">RLLLRRRR → 14 · authenticated receipt logs → same pool</p>
-        <span className="text-xs font-semibold text-[#ffb389]">front &lt; victim &lt; back ✓</span>
+        <p className="font-mono text-[10px] text-white/38">
+          RLLLRRRR → 14 · authenticated receipt logs → same pool
+        </p>
+        <span className="text-xs font-semibold text-[#ffb389]">
+          front &lt; victim &lt; back ✓
+        </span>
       </div>
     </article>
   );
@@ -155,44 +263,99 @@ function FairExitFlagship() {
         <div>
           <div className="mb-2 flex items-center gap-2">
             <span className="size-2 rounded-full bg-[#78bfff] shadow-[0_0_12px_#78bfff]" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9dd0f5]">FairExit verdict</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9dd0f5]">
+              FairExit verdict
+            </span>
           </div>
-          <h2 className="text-xl font-semibold tracking-[-0.025em]">FIFO exit covenant broken</h2>
+          <h2 className="text-xl font-semibold tracking-[-0.025em]">
+            FIFO exit covenant broken
+          </h2>
         </div>
-        <Badge className="bg-[#78bfff]/10 text-[#a8d8f9]">4 positive proofs</Badge>
+        <Badge className="bg-[#78bfff]/10 text-[#a8d8f9]">
+          4 positive proofs
+        </Badge>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <OrderLane label="Requests" left="A · request #7" right="B · request #8" />
-        <OrderLane label="Processed" left="B · request #8" right="A · request #7" inverted />
+        <OrderLane
+          label="Requests"
+          left="A · request #7"
+          right="B · request #8"
+        />
+        <OrderLane
+          label="Processed"
+          left="B · request #8"
+          right="A · request #7"
+          inverted
+        />
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/8 pt-4">
-        <p className="font-mono text-[10px] text-white/38">request A &lt; B · process B &lt; A</p>
-        <span className="text-xs font-semibold text-[#9dd0f5]">completed inversion ✓</span>
+        <p className="font-mono text-[10px] text-white/38">
+          request A &lt; B · process B &lt; A
+        </p>
+        <span className="text-xs font-semibold text-[#9dd0f5]">
+          completed inversion ✓
+        </span>
       </div>
     </article>
   );
 }
 
-function Position({ index, label, accent }: { index: string; label: string; accent: 'orange' | 'lime' }) {
+function Position({
+  index,
+  label,
+  accent,
+}: {
+  index: string;
+  label: string;
+  accent: 'orange' | 'lime';
+}) {
   const isLime = accent === 'lime';
   return (
-    <div className={`rounded-xl border p-3 text-center ${isLime ? 'border-[#b8f34a]/28 bg-[#b8f34a]/9' : 'border-[#ff9f67]/18 bg-[#ff9f67]/[0.055]'}`}>
-      <span className={`block text-2xl font-semibold tracking-[-0.04em] ${isLime ? 'text-[#c9fa72]' : 'text-[#ffb389]'}`}>{index}</span>
-      <span className="mt-1 block text-[9px] font-medium uppercase tracking-[0.1em] text-white/38">{label}</span>
+    <div
+      className={`rounded-xl border p-3 text-center ${isLime ? 'border-[#b8f34a]/28 bg-[#b8f34a]/9' : 'border-[#ff9f67]/18 bg-[#ff9f67]/[0.055]'}`}
+    >
+      <span
+        className={`block text-2xl font-semibold tracking-[-0.04em] ${isLime ? 'text-[#c9fa72]' : 'text-[#ffb389]'}`}
+      >
+        {index}
+      </span>
+      <span className="mt-1 block text-[9px] font-medium uppercase tracking-[0.1em] text-white/38">
+        {label}
+      </span>
     </div>
   );
 }
 
-function OrderLane({ label, left, right, inverted = false }: { label: string; left: string; right: string; inverted?: boolean }) {
+function OrderLane({
+  label,
+  left,
+  right,
+  inverted = false,
+}: {
+  label: string;
+  left: string;
+  right: string;
+  inverted?: boolean;
+}) {
   return (
-    <div className={`rounded-xl border p-3.5 ${inverted ? 'border-[#78bfff]/28 bg-[#78bfff]/8' : 'border-white/8 bg-white/[0.025]'}`}>
-      <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/32">{label}</p>
+    <div
+      className={`rounded-xl border p-3.5 ${inverted ? 'border-[#78bfff]/28 bg-[#78bfff]/8' : 'border-white/8 bg-white/[0.025]'}`}
+    >
+      <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/32">
+        {label}
+      </p>
       <div className="mt-2 flex items-center gap-2">
-        <span className="min-w-0 flex-1 rounded-lg bg-white/[0.055] px-2 py-2 text-center font-mono text-[10px] text-white/65">{left}</span>
-        <ArrowRight className={`size-3.5 shrink-0 ${inverted ? 'text-[#78bfff]' : 'text-white/25'}`} />
-        <span className="min-w-0 flex-1 rounded-lg bg-white/[0.055] px-2 py-2 text-center font-mono text-[10px] text-white/65">{right}</span>
+        <span className="min-w-0 flex-1 rounded-lg bg-white/[0.055] px-2 py-2 text-center font-mono text-[10px] text-white/65">
+          {left}
+        </span>
+        <ArrowRight
+          className={`size-3.5 shrink-0 ${inverted ? 'text-[#78bfff]' : 'text-white/25'}`}
+        />
+        <span className="min-w-0 flex-1 rounded-lg bg-white/[0.055] px-2 py-2 text-center font-mono text-[10px] text-white/65">
+          {right}
+        </span>
       </div>
     </div>
   );

@@ -15,9 +15,11 @@ interface Vm {
 }
 
 /// @title DeployCc3Mvp
-/// @notice Deploys and wires the production-pinned MVP contracts on Creditcoin CC3 testnet.
+/// @notice Declarative deployment and wiring specification for Creditcoin CC3 testnet.
 /// @dev The signer is read only from the process environment. The source-chain DemoExitVault is
 ///      deliberately excluded: it belongs on an Attestcoin-supported Ethereum source network.
+///      Foundry 1.5 cannot currently fork the raw CC3 RPC because its block response omits
+///      mixHash/prevRandao; DEPLOY_CC3.md documents the equivalent direct deployment path.
 contract DeployCc3Mvp {
     uint256 private constant CC3_CHAIN_ID = 102_031;
     address private constant CANONICAL_EVM_V1_DECODER = 0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f;

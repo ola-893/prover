@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "network": {
+    "name": "Creditcoin CC3 Testnet",
+    "chainId": 102031,
+    "rpcUrl": "https://rpc.cc3-testnet.creditcoin.network",
+    "explorerUrl": "https://creditcoin-testnet.blockscout.com",
+    "proofBuilderUrl": "https://prover.cc3-testnet.creditcoin.network"
+  },
+  "deploymentDate": "2026-08-29",
+  "administrator": {
+    "address": "0xc7b11732DFba02C96DD7805E98db7E190Cbbc6E9",
+    "scope": "Testnet owner of PerformanceBureau and DemoLender",
+    "productionReady": false
+  },
+  "dependencies": {
+    "nativeQueryVerifier": "0x0000000000000000000000000000000000000FD2",
+    "nativeChainInfo": "0x0000000000000000000000000000000000000fD3",
+    "evmV1Decoder": {
+      "address": "0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f",
+      "runtimeBytes": 9598,
+      "runtimeCodeHash": "0xb549c9d8eaf7d361192f8e363fe98717464441e2dd26e2b3bd1e0725df73a065"
+    }
+  },
+  "contracts": {
+    "performanceBureau": {
+      "address": "0x8Ef418F6E740950cAd8C4fa22A4F7B7990B00D74",
+      "runtimeBytes": 5387,
+      "runtimeCodeHash": "0x6bb9e01446f7d8c6585b082b33d7918fb1a8283ed4be18a356a8935165afa84c",
+      "deploymentTransaction": "0x668e051394df1355adc5b0da89381297c3e0cb6485d1e3a274f162a3ccbce0fa",
+      "deploymentBlock": 5393466,
+      "deploymentNonce": 8
+    },
+    "nativeOrderingSystem": {
+      "address": "0x04803D3465C9d977775451350A73b17f25e4b9c8",
+      "runtimeBytes": 294,
+      "runtimeCodeHash": "0x1088701e1f881f5e270dd4a58372fba2a13df571f791259860623d1f4c830ed0",
+      "deploymentTransaction": "0x67e1dcef01a2d251df03ebae6423f7872f60ad20f3aad8f123d2ed781941bb01",
+      "deploymentBlock": 5393474,
+      "deploymentNonce": 9
+    },
+    "covenantBook": {
+      "address": "0x66aF3e9Ad07A236b29de7ad07083C037a4244223",
+      "runtimeBytes": 6017,
+      "runtimeCodeHash": "0x1d67e27527413b26fb34aef775aca094f18e21b2c3cc1b1a1eca5cd66efad67a",
+      "createdBy": "nativeOrderingSystem"
+    },
+    "orderingCourt": {
+      "address": "0xc01f7E27D4D712241B1cAAD972E0FC589146c5Ff",
+      "runtimeBytes": 17723,
+      "runtimeCodeHash": "0x408638df0eae96be9efeabfc29b1c024618c8b20594e8d06428202b82948d316",
+      "createdBy": "nativeOrderingSystem",
+      "linkedDecoderAddressPresent": true
+    },
+    "nativeAaveEvidenceAdapter": {
+      "address": "0xDff00fde3829fFcA7A1dCAB0AA30602dd9F380A4",
+      "runtimeBytes": 11012,
+      "runtimeCodeHash": "0x23161f6b410872bc04a3ea162cfc01d496073ae521b3a1138be7d7bba20b942f",
+      "deploymentTransaction": "0x9987f6868b6a0942a7155514dc2968ee6349d9cac654b8fb3b60bee992cd0d04",
+      "deploymentBlock": 5393478,
+      "deploymentNonce": 10,
+      "linkedDecoderAddressPresent": true
+    },
+    "demoLender": {
+      "address": "0xb6A6858C7BBb755c2AD014d07583369278078F71",
+      "runtimeBytes": 3190,
+      "runtimeCodeHash": "0xc08550e810c6f02fc576b7de75897a1204d52ff70f4e65c933d63265ab7b27f9",
+      "deploymentTransaction": "0x8a3685900e60187876671e80ccbfc6c4ff050fa03f9e1dcfa8a287058c6ba6f9",
+      "deploymentBlock": 5393481,
+      "deploymentNonce": 11
+    }
+  },
+  "configuration": {
+    "orderingCourtReporterMask": 48,
+    "orderingCourtEvidenceKinds": ["SandwichBreach", "FifoBreach"],
+    "orderingCourtGrantTransaction": "0x4cd2863d5c13b40bc0c50db9f04083ad56a702ec11a7205da5c52de5cca37f63",
+    "aaveAdapterReporterMask": 7,
+    "aaveAdapterEvidenceKinds": [
+      "AaveBorrow",
+      "AaveRepay",
+      "AaveSelfRepaymentObservation"
+    ],
+    "aaveAdapterGrantTransaction": "0xc3869bc3940645a0356e9c8fa8545e5f414418440f968862944aeb62b6a3bc63"
+  },
+  "verification": {
+    "allDeploymentReceiptsSucceeded": true,
+    "factoryChildrenMatchGetters": true,
+    "nativeDependenciesMatch": true,
+    "reporterMasksMatch": true,
+    "decoderCodeHashMatches": true,
+    "nativeCalculateTxIndexSmoke": {
+      "laterality": [false, true],
+      "expectedIndex": 2,
+      "actualIndex": 2
+    },
+    "liveAttestcoinProofSubmitted": false
+  },
+  "sourceFixture": {
+    "demoExitVault": null,
+    "note": "Deploy separately to an Attestcoin-supported Ethereum source network."
+  }
+}

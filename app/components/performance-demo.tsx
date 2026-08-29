@@ -64,7 +64,8 @@ export function PerformanceDemo() {
                   Interactive MVP
                 </Badge>
                 <span className="text-xs text-white/40">
-                  Evidence fixtures are visibly labeled until live proof capture
+                  CC3 contracts are live; evidence fixtures stay labeled until
+                  live proof capture
                 </span>
               </div>
               <p className="text-xs font-semibold uppercase tracking-[0.17em] text-[#b8f34a]">
