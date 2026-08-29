@@ -105,3 +105,22 @@ Use read-only RPC calls to confirm all of the following before publishing addres
 6. The canonical decoder still has the pinned runtime code hash above.
 7. A captured Attestcoin proof succeeds in a separate integration smoke test. Contract deployment
    alone is not evidence that the external proof builder produced a valid proof.
+
+## Keyless live-proof preflight
+
+The repository includes a read-only integration smoke test for the two public Aave receipts. Run it
+from the repository root after deployment:
+
+```sh
+node scripts/verify-live-aave.mjs
+```
+
+It requests fresh proofs from the public proof builder, verifies that Ethereum is attested through at
+least the source block plus one, derives each transaction index from sibling laterality, and calls the
+deployed `NativeAaveEvidenceAdapter` through `eth_call`. A successful result proves that the hosted
+payload reaches the live native verifier and the adapter decoder without reverting. It does not
+persist evidence or emit a durable verdict.
+
+The preflight deliberately has no broadcast mode and never reads a private key. When the facts are
+ready to be persisted, use a fresh funded CC3 submitter with a hidden interactive prompt or encrypted
+keystore. `ingestAaveFact` is permissionless, so the bureau administrator is not required.

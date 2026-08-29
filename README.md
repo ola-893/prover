@@ -80,8 +80,9 @@ The court infrastructure is deployed on Creditcoin CC3 testnet (chain ID `102031
 
 The sanitized [deployment manifest](./contracts/deployments/cc3-testnet.json) records transaction
 hashes, runtime code hashes, child wiring, dependency addresses and reporter masks. Deployment proves
-the infrastructure is live; it does not turn browser fixtures into live Attestcoin verdicts. A live
-proof-builder payload and successful `verifyAndEmit` transaction remain separate integration work.
+the infrastructure is live; it does not turn browser fixtures into live Attestcoin verdicts. The
+keyless preflight below now fetches real proof-builder payloads and passes them through the deployed
+native verifier with `eth_call`; persisting those facts is a separate state-changing transaction.
 
 ## Exactly what the predicates establish
 
@@ -132,8 +133,34 @@ The unit suite pins a real public receipt pair for wallet
 | Repay | `0x84ea8dcff1eedb9973b8cc950d497f271e56c1d80e172187710721bfd02ba344` | 25,854,747 | 120 | 4 | 90,000,055,729 |
 
 The unit test reconstructs those event facts behind a mock verifier to test decoding and policy logic.
-A live verdict still requires fresh canonical EVM-V1 transaction bytes, Merkle paths, and Attestcoin
-continuity proofs for both blocks.
+The preflight below fetches fresh canonical EVM-V1 transaction bytes, Merkle paths, and Attestcoin
+continuity proofs for both blocks. A durable bureau record still requires a mined CC3 transaction.
+
+## Reproduce the live Aave proof preflight
+
+From the repository root, run:
+
+```bash
+node scripts/verify-live-aave.mjs
+```
+
+The command uses only public endpoints. It checks proof-builder health, waits for an attested height
+past the source transactions, fetches both proofs by transaction hash, validates every proof field,
+independently recovers each transaction index from Merkle laterality, and submits the exact Solidity
+tuples to the deployed adapter through read-only `eth_call` simulations. It prints the two predicted
+fact IDs together with `"persisted": false`.
+
+No private key, API key, Ethereum RPC key, Pinata credential or AI service is involved. Node.js 22+
+and Foundry's `cast` are required. Public endpoint overrides may be supplied with
+`CREDITCOIN_PROOF_BUILDER_URL`, `CREDITCOIN_RPC_URL`, and `AAVE_ADAPTER_ADDRESS`.
+
+The current live preflight returns:
+
+- Borrow fact `0xf6e62563f3caf5066b95731a45f3fdea394982ad96af0feee603eadca1d0e660`;
+- Repay fact `0x9feb2581ac40f5b799acbd834e77a624e6bffa4634bc8a437f381bacf3d31483`.
+
+Those IDs are predictions until the calls are broadcast and mined. A fresh funded CC3 submitter can
+persist them because ingestion is permissionless; the testnet administrator key is not required.
 
 ## Local development
 
@@ -162,6 +189,9 @@ cd ../app
 npx oxlint app/page.tsx components/performance-demo.tsx lib/demo.ts app/layout.tsx
 npx tsc --noEmit
 npm run build
+
+cd ..
+node --test scripts/verify-live-aave.test.mjs
 ```
 
 ## Security boundaries

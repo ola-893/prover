@@ -93,6 +93,32 @@
       "expectedIndex": 2,
       "actualIndex": 2
     },
+    "liveAttestcoinProofPreflight": {
+      "verifiedAt": "2026-08-29",
+      "mode": "eth_call",
+      "persisted": false,
+      "chainKey": 3,
+      "facts": [
+        {
+          "kind": "AaveBorrow",
+          "sourceTransaction": "0xbcacb57223f15070dec270cede4eed03deb60ecb117d35d8fe518a66d1c590ff",
+          "sourceBlock": 25854707,
+          "sourceTransactionIndex": 201,
+          "receiptLogOrdinal": 4,
+          "merkleSiblingCount": 10,
+          "simulatedFactId": "0xf6e62563f3caf5066b95731a45f3fdea394982ad96af0feee603eadca1d0e660"
+        },
+        {
+          "kind": "AaveRepay",
+          "sourceTransaction": "0x84ea8dcff1eedb9973b8cc950d497f271e56c1d80e172187710721bfd02ba344",
+          "sourceBlock": 25854747,
+          "sourceTransactionIndex": 120,
+          "receiptLogOrdinal": 4,
+          "merkleSiblingCount": 10,
+          "simulatedFactId": "0x9feb2581ac40f5b799acbd834e77a624e6bffa4634bc8a437f381bacf3d31483"
+        }
+      ]
+    },
     "liveAttestcoinProofSubmitted": false
   },
   "sourceFixture": {
