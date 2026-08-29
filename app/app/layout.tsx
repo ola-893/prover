@@ -13,14 +13,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(
+    process.env.SITE_URL ??
+      'https://prover-defi-court.yellow-haven-4898.chatgpt.site',
+  ),
   title: 'PROVER — Prove the order. Enforce the promise.',
   description:
     'An Attestcoin-powered ordering court that proves relay sandwiches and FIFO queue inversions, enforces bonded promises, and carries rulings into future financial terms.',
+  alternates: { canonical: '/' },
   openGraph: {
     title: 'PROVER — Prove the order. Enforce the promise.',
     description:
       'Merkle paths prove sandwich ordering. FairExit proves queue inversion. Bonded promises become enforceable evidence.',
+    url: '/',
     type: 'website',
     images: [{ url: '/og.png', width: 1200, height: 630, alt: 'PROVER ordering court' }],
   },
