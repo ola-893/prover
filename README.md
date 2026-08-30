@@ -1,8 +1,8 @@
 # Prover
 
-**A cross-chain performance court for DeFi promises.** Prover turns authenticated source-chain
-transactions into typed evidence, applies deterministic breach predicates, settles bonded
-covenants, and publishes an explainable performance record on Creditcoin.
+**A cross-chain bureau of fulfilled and breached financial promises.** Prover turns authenticated
+source-chain transactions into typed evidence, applies deterministic breach predicates, settles
+bonded covenants, and publishes an explainable performance record on Creditcoin.
 
 The MVP leads with two claims that transaction ordering can prove particularly well:
 
@@ -12,6 +12,18 @@ The MVP leads with two claims that transaction ordering can prove particularly w
 2. **FairExit FIFO enforcement.** A vault operator posts a FIFO covenant. Four authenticated events
    can prove that request A preceded request B while B was processed before A, settle the bond, and
    pay the earlier requester.
+
+Two additional contract-tested modules extend the same evidence standard beyond ordering:
+
+3. **Bonded RFQ execution terms.** One exact `RFQExecuted` receipt event proves a matching outcome
+   or classifies wrong beneficiary, asset, amount, recipient, short output, or positive lateness.
+4. **Bonded settlement release.** One exact `SettlementReleased` receipt event proves a matching
+   outcome or classifies wrong asset, recipient, short payment, or positive lateness.
+
+Those two modules are locally tested and not deployed. Their current demo emitter records events but
+does not transfer assets, and their promises are actor-authored rather than beneficiary-authorized.
+They therefore remain outside `PerformanceBureau` until approved source adapters and beneficiary
+authorization make the outcomes economically attributable.
 
 The same record can also hold narrowly stated borrower evidence. The demonstration imports a public
 Ethereum Aave V3 Borrow and later self-funded Repay, derives a **self-repayment observation**, and
@@ -60,6 +72,9 @@ The browser fixtures are clearly labeled. A fixture is not presented as a live A
 | `PolicyV1` | Produces transparent experimental terms from the evidence vector. |
 | `DemoLender` | Freezes a quoted policy result into a demonstrative Creditcoin loan offer. |
 | `DemoExitVault` | Emits the unique, non-cancellable request/process schema required by the FairExit policy. |
+| `PromiseBook` | Holds self-bonded RFQ/settlement terms, enforces source-height evidence windows, resolves fulfilled/breached/proof-defaulted outcomes, and credits pull payments. |
+| `PromiseCourt` | Authenticates one exact RFQ or settlement receipt event and deterministically classifies matching, wrong, short, or late outcomes. |
+| `DemoPromiseSource` | Fixture-only event emitter with actor-scoped terminal-event uniqueness; it does not custody or transfer assets. |
 
 Production proof verification is pinned to Creditcoin's native verifier at `0x…0FD2`; covenant
 height checks use ChainInfo at `0x…0FD3`. The production ordering deployer pins both addresses. The
@@ -83,6 +98,10 @@ hashes, runtime code hashes, child wiring, dependency addresses and reporter mas
 the infrastructure is live; it does not turn browser fixtures into live Attestcoin verdicts. The
 keyless preflight below now fetches real proof-builder payloads and passes them through the deployed
 native verifier with `eth_call`; persisting those facts is a separate state-changing transaction.
+
+`PromiseBook`, `PromiseCourt`, and `DemoPromiseSource` are not part of this live deployment table.
+They currently pass the local contract suite using authenticated-proof mocks; no native RFQ or
+settlement proof has been submitted and no live outcome has been recorded for them.
 
 ## Exactly what the predicates establish
 
@@ -121,6 +140,23 @@ match.
 Aave debt is aggregate and Repay does not identify the Borrow or its interest-rate mode. Therefore the
 observation does **not** prove a linked loan, full repayment, current balance, timeliness, liquidation
 absence, or complete history. A zero imported-liquidation count always means coverage is unknown.
+
+### RFQ and settlement outcome modules
+
+Both paths first authenticate the exact V1 transaction and receipt bytes. The selected log must have
+the committed source chain, emitter, event signature, promise ID, reference ID, actor, topic count,
+data length, and successful receipt status. A mismatch in those relevance fields rejects the proof;
+it does not slash the actor. Only after relevance is established does the court classify wrong,
+short, or late event fields as a breach.
+
+The terms commit to actor-scoped unique terminal events. Duplicate relevant events in one receipt are
+rejected, while cross-transaction uniqueness remains a source-emitter trust assumption. A production
+bureau reporter must therefore pin an audited adapter that enforces this invariant and derives event
+values from real custody or execution rather than caller-supplied claims.
+
+The generic proof-submission default is narrower: it says no acceptable fulfillment proof reached
+`PromiseBook` before the evidence window closed. It does not prove that no fulfillment transaction
+existed on the source chain.
 
 ## Public Aave proof candidate
 
@@ -198,11 +234,16 @@ node --test scripts/verify-live-aave.test.mjs
 
 - Covenants cannot be edited, shortened, or cancelled after opening.
 - Coverage must begin at least 64 blocks beyond the latest attested tip; clients must also choose a
-  height beyond the live source head because attestations may lag.
+  height beyond the live source head plus a safety margin because attestations may lag. The current
+  contracts do not causally prove that registration preceded a source event; a production version
+  needs a two-step source activation handshake.
 - Ruling replay is blocked in both the court and bond book.
 - Payouts use pull accounting. A revoked bureau permission cannot roll back an already settled bond.
 - Reporter permissions are scoped by evidence kind.
 - The demonstration's `1 CTC = 1 USDC` conversion is an explicit fixture, not an oracle claim.
+- Raw `PromiseBook.actorStats` are self-posted ledger statistics, not bureau-grade performance. Do
+  not use them for credit terms until source adapters are approved and beneficiaries authorize the
+  exact obligations.
 - Contracts have not been independently audited. Use them as hackathon software, not production
   financial infrastructure.
 

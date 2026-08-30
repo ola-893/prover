@@ -19,21 +19,28 @@ export const metadata: Metadata = {
   ),
   title: 'PROVER — Prove the order. Enforce the promise.',
   description:
-    'An Attestcoin-powered ordering court that proves relay sandwiches and FIFO queue inversions, enforces bonded promises, and carries rulings into future financial terms.',
+    'A cross-chain bureau of fulfilled and breached financial promises, led by authenticated sandwich and FairExit ordering verdicts.',
   alternates: { canonical: '/' },
   openGraph: {
     title: 'PROVER — Prove the order. Enforce the promise.',
     description:
-      'Merkle paths prove sandwich ordering. FairExit proves queue inversion. Bonded promises become enforceable evidence.',
+      'Merkle paths prove sandwich ordering. FairExit proves queue inversion. Exact financial promises become typed evidence.',
     url: '/',
     type: 'website',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'PROVER ordering court' }],
+    images: [
+      {
+        url: '/og.png',
+        width: 1200,
+        height: 630,
+        alt: 'PROVER cross-chain promise bureau',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'PROVER — Prove the order. Enforce the promise.',
     description:
-      'Merkle paths prove sandwich ordering. FairExit proves queue inversion. Bonded promises become enforceable evidence.',
+      'Merkle paths prove sandwich ordering. FairExit proves queue inversion. Exact financial promises become typed evidence.',
     images: ['/og.png'],
   },
 };

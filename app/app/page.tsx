@@ -11,6 +11,7 @@ import { PerformanceDemo } from '@/components/performance-demo';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { cc3AddressUrl, cc3Deployment, shortAddress } from '@/lib/deployment';
+import { promiseCatalog, type PromiseCoverage } from '@/lib/promise-catalog';
 
 export default function Home() {
   return (
@@ -28,7 +29,7 @@ export default function Home() {
             <div>
               <p className="text-[15px] font-bold tracking-[-0.02em]">PROVER</p>
               <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/38">
-                Ordering court
+                Cross-chain bureau
               </p>
             </div>
           </a>
@@ -37,14 +38,14 @@ export default function Home() {
             <a className="transition hover:text-white" href="#order-proofs">
               Order proofs
             </a>
+            <a className="transition hover:text-white" href="#promises">
+              Promise coverage
+            </a>
             <a className="transition hover:text-white" href="#deployment">
               CC3 deployment
             </a>
             <a className="transition hover:text-white" href="#court">
               Evidence demo
-            </a>
-            <a className="transition hover:text-white" href="#consequence">
-              Financial consequence
             </a>
           </div>
 
@@ -80,9 +81,9 @@ export default function Home() {
         <div className="relative mx-auto max-w-[1500px]">
           <div className="grid items-end gap-12 xl:grid-cols-[0.88fr_1.12fr]">
             <div className="max-w-3xl">
-              <Badge className="mb-5 border border-white/10 bg-white/[0.045] text-[#c9fa72]">
-                <GitCompareArrows className="size-3" /> Merkle laterality
-                becomes evidence
+              <Badge className="mb-5 h-auto max-w-full whitespace-normal rounded-xl border border-white/10 bg-white/[0.045] px-3 py-1.5 text-left leading-4 text-[#c9fa72]">
+                <GitCompareArrows className="size-3" /> A cross-chain bureau of
+                fulfilled and breached financial promises.
               </Badge>
               <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.06em] sm:text-6xl lg:text-[76px]">
                 Prove the order.
@@ -141,6 +142,8 @@ export default function Home() {
 
       <LiveDeployment />
 
+      <PromiseCoverageSection />
+
       <section
         id="consequence"
         className="border-b border-white/8 bg-[#0d1d17] px-4 py-5 sm:px-7 lg:px-10"
@@ -164,6 +167,135 @@ export default function Home() {
 
       <PerformanceDemo />
     </main>
+  );
+}
+
+function PromiseCoverageSection() {
+  return (
+    <section
+      id="promises"
+      className="scroll-mt-16 border-b border-white/8 bg-[#091511] px-4 py-16 sm:px-7 sm:py-20 lg:px-10"
+    >
+      <div className="mx-auto max-w-[1500px]">
+        <div className="grid gap-5 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#b8f34a]">
+              Promise coverage
+            </p>
+            <h2 className="mt-3 max-w-lg text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">
+              Four promises. One evidence standard.
+            </h2>
+          </div>
+          <p className="max-w-3xl text-sm leading-6 text-white/48 lg:justify-self-end">
+            Ordering is the flagship: sandwich and FairExit turn Merkle position
+            into a ruling. The same court pattern now classifies exact RFQ and
+            settlement events without pretending those local modules are already
+            deployed or bureau-trusted.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {promiseCatalog.map((item) => (
+            <PromiseCard key={item.id} item={item} />
+          ))}
+        </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          <p className="rounded-xl border border-[#b8f34a]/14 bg-[#b8f34a]/[0.045] px-4 py-3 text-xs leading-5 text-white/48">
+            <span className="font-semibold text-[#c9fa72]">
+              Positive evidence boundary.{' '}
+            </span>
+            A wrong or late transaction is proved from authenticated
+            source-chain evidence. A deadline default means no acceptable
+            fulfillment proof reached the registered promise before its evidence
+            window closed—it is not proof that no source-chain transaction
+            existed.
+          </p>
+          <p className="rounded-xl border border-white/8 bg-white/[0.025] px-4 py-3 text-xs leading-5 text-white/42">
+            <span className="font-semibold text-white/68">
+              Trust boundary.{' '}
+            </span>
+            RFQ and settlement remain self-posted, contract-tested event
+            covenants. They stay outside the shared bureau until an approved
+            source adapter and beneficiary authorization make their outcomes
+            economically attributable.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PromiseCard({ item }: { item: PromiseCoverage }) {
+  const accents = {
+    orange: {
+      dot: 'bg-[#ff9f67]',
+      eyebrow: 'text-[#ffb389]',
+      border: 'border-[#ff9f67]/18',
+      badge: 'bg-[#ff9f67]/10 text-[#ffb389]',
+    },
+    blue: {
+      dot: 'bg-[#78bfff]',
+      eyebrow: 'text-[#9dd0f5]',
+      border: 'border-[#78bfff]/18',
+      badge: 'bg-[#78bfff]/10 text-[#9dd0f5]',
+    },
+    lime: {
+      dot: 'bg-[#b8f34a]',
+      eyebrow: 'text-[#c9fa72]',
+      border: 'border-[#b8f34a]/18',
+      badge: 'bg-[#b8f34a]/10 text-[#c9fa72]',
+    },
+    violet: {
+      dot: 'bg-[#c3a4ff]',
+      eyebrow: 'text-[#d4bfff]',
+      border: 'border-[#c3a4ff]/18',
+      badge: 'bg-[#c3a4ff]/10 text-[#d4bfff]',
+    },
+  } as const;
+  const accent = accents[item.accent];
+
+  return (
+    <article
+      className={`flex h-full flex-col rounded-2xl border bg-white/[0.028] p-5 ${accent.border}`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div
+          className={`flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.14em] ${accent.eyebrow}`}
+        >
+          <span className={`size-1.5 rounded-full ${accent.dot}`} />
+          {item.eyebrow}
+        </div>
+        <Badge className={accent.badge}>
+          {item.maturity === 'flagship' ? 'Flagship' : 'Court module'}
+        </Badge>
+      </div>
+
+      <h3 className="mt-4 text-lg font-semibold tracking-[-0.025em]">
+        {item.title}
+      </h3>
+      <p className="mt-3 text-xs leading-5 text-white/46">{item.promise}</p>
+
+      <div className="mt-5 space-y-3 border-t border-white/8 pt-4 text-[11px] leading-5">
+        <div>
+          <p className="font-semibold uppercase tracking-[0.1em] text-white/28">
+            Evidence
+          </p>
+          <p className="mt-1 text-white/55">{item.proof}</p>
+        </div>
+        <div>
+          <p className="font-semibold uppercase tracking-[0.1em] text-white/28">
+            Consequence
+          </p>
+          <p className="mt-1 text-white/55">{item.consequence}</p>
+        </div>
+      </div>
+
+      <div className="mt-auto space-y-1.5 border-t border-white/8 pt-4 font-mono text-[9px] uppercase tracking-[0.08em]">
+        <p className="text-white/52">{item.contractStatus}</p>
+        <p className="text-white/28">{item.evidenceStatus}</p>
+      </div>
+    </article>
   );
 }
 
