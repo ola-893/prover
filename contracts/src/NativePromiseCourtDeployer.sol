@@ -11,7 +11,9 @@ contract NativePromiseCourtDeployer is PromiseCourtDeployer {
     address public constant NATIVE_QUERY_VERIFIER = 0x0000000000000000000000000000000000000FD2;
     address public constant NATIVE_CHAIN_INFO = 0x0000000000000000000000000000000000000fD3;
 
-    constructor()
-        PromiseCourtDeployer(NativeQueryVerifierLib.getVerifier(), IPromiseAttestedHeightSource(NATIVE_CHAIN_INFO))
+    constructor(address registryGovernor)
+        PromiseCourtDeployer(
+            NativeQueryVerifierLib.getVerifier(), IPromiseAttestedHeightSource(NATIVE_CHAIN_INFO), registryGovernor
+        )
     { }
 }

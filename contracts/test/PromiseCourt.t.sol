@@ -6,6 +6,7 @@ import { NativePromiseCourtDeployer } from "../src/NativePromiseCourtDeployer.so
 import { IPromiseAttestedHeightSource, PromiseBook } from "../src/PromiseBook.sol";
 import { PromiseCourt } from "../src/PromiseCourt.sol";
 import { PromiseCourtDeployer } from "../src/PromiseCourtDeployer.sol";
+import { PromiseSourceRegistry } from "../src/PromiseSourceRegistry.sol";
 import { AttestcoinProofAdapter } from "../src/attestcoin/AttestcoinProofAdapter.sol";
 import { EvmV1Decoder } from "../src/attestcoin/EvmV1Decoder.sol";
 import { INativeQueryVerifier } from "../src/attestcoin/INativeQueryVerifier.sol";
@@ -44,7 +45,7 @@ contract PromiseCourtTest is TestBase {
     uint64 private constant PROOF_DEADLINE = 1_300;
 
     address private constant ACTOR = address(0xA11CE);
-    address private constant BENEFICIARY = address(0xB0B);
+    uint256 private constant BENEFICIARY_KEY = 0xB0B;
     address private constant RECIPIENT = address(0xCAFE);
     address private constant OTHER = address(0xBAD);
     address private constant INPUT_TOKEN = address(0x1111);
@@ -58,6 +59,7 @@ contract PromiseCourtTest is TestBase {
     uint256 private constant MIN_SETTLEMENT_AMOUNT = 25 ether;
     uint256 private constant BOND = 12 ether;
     uint256 private constant PENALTY = 10 ether;
+    bytes32 private constant ENTROPY_HASH = keccak256("promise-court-anchor");
 
     MockNativeQueryVerifier private verifier;
     PromiseCourtHeightSource private chainInfo;
@@ -65,15 +67,25 @@ contract PromiseCourtTest is TestBase {
     PromiseBook private book;
     PromiseCourt private court;
     DemoPromiseSource private source;
+    address private beneficiary;
+    uint256 private authorizationNonce;
 
     function setUp() public {
+        beneficiary = vm.addr(BENEFICIARY_KEY);
         verifier = new MockNativeQueryVerifier();
         chainInfo = new PromiseCourtHeightSource();
         chainInfo.setTip(CHAIN_KEY, INITIAL_TIP, true, true);
-        system = new PromiseCourtDeployer(verifier, chainInfo);
+        system = new PromiseCourtDeployer(verifier, chainInfo, address(this));
         book = system.PROMISE_BOOK();
         court = system.PROMISE_COURT();
         source = new DemoPromiseSource();
+        PromiseSourceRegistry registry = system.SOURCE_REGISTRY();
+        registry.setSourceApproval(
+            uint8(PromiseBook.PromiseKind.RFQ_EXECUTION), CHAIN_KEY, address(source), court.RFQ_POLICY_ID(), true
+        );
+        registry.setSourceApproval(
+            uint8(PromiseBook.PromiseKind.SETTLEMENT), CHAIN_KEY, address(source), court.SETTLEMENT_POLICY_ID(), true
+        );
         vm.deal(ACTOR, 1_000 ether);
     }
 
@@ -95,24 +107,28 @@ contract PromiseCourtTest is TestBase {
             court.SETTLEMENT_RELEASED(),
             keccak256("SettlementReleased(bytes32,bytes32,address,address,address,uint256)")
         );
+        assertEq(court.RFQ_POLICY_ID(), keccak256("PROVER_PROMISE_RFQ_EXECUTED_V1"));
+        assertEq(court.SETTLEMENT_POLICY_ID(), keccak256("PROVER_PROMISE_SETTLEMENT_RELEASED_V1"));
     }
 
     function test_InjectableDeployerPermanentlyWiresBookAndCourt() public view {
         assertEq(address(book.CHAIN_INFO()), address(chainInfo));
         assertEq(address(court.VERIFIER()), address(verifier));
         assertEq(address(court.PROMISE_BOOK()), address(book));
+        assertEq(address(book.SOURCE_REGISTRY()), address(system.SOURCE_REGISTRY()));
         assertEq(book.court(), address(court));
         assertEq(book.DEPLOYER(), address(system));
     }
 
     function test_NativeDeployerPinsCreditcoinPrecompiles() public {
-        NativePromiseCourtDeployer nativeSystem = new NativePromiseCourtDeployer();
+        NativePromiseCourtDeployer nativeSystem = new NativePromiseCourtDeployer(address(this));
         PromiseBook nativeBook = nativeSystem.PROMISE_BOOK();
         PromiseCourt nativeCourt = nativeSystem.PROMISE_COURT();
 
         assertEq(address(nativeCourt.VERIFIER()), nativeSystem.NATIVE_QUERY_VERIFIER());
         assertEq(address(nativeBook.CHAIN_INFO()), nativeSystem.NATIVE_CHAIN_INFO());
         assertEq(address(nativeCourt.PROMISE_BOOK()), address(nativeBook));
+        assertEq(nativeSystem.SOURCE_REGISTRY().governor(), address(this));
         assertEq(nativeBook.court(), address(nativeCourt));
     }
 
@@ -120,7 +136,8 @@ contract PromiseCourtTest is TestBase {
         PromiseCourt.RfqTerms memory base = _rfqTerms();
         bytes32 expected = keccak256(
             abi.encode(
-                "PROMISE_COURT_RFQ_TERMS_V3",
+                "PROMISE_COURT_RFQ_TERMS_V4",
+                court.RFQ_POLICY_ID(),
                 court.RFQ_EXECUTED(),
                 "UNIQUE_FINAL_EVENT_PER_PROMISE_ID_AND_ACTOR",
                 QUOTE_ID,
@@ -145,7 +162,8 @@ contract PromiseCourtTest is TestBase {
         PromiseCourt.SettlementTerms memory terms = _settlementTerms();
         bytes32 expected = keccak256(
             abi.encode(
-                "PROMISE_COURT_SETTLEMENT_TERMS_V3",
+                "PROMISE_COURT_SETTLEMENT_TERMS_V4",
+                court.SETTLEMENT_POLICY_ID(),
                 court.SETTLEMENT_RELEASED(),
                 "UNIQUE_FINAL_EVENT_PER_PROMISE_ID_AND_ACTOR",
                 SETTLEMENT_ID,
@@ -211,7 +229,7 @@ contract PromiseCourtTest is TestBase {
         assertEq(uint256(outcome), uint256(PromiseBook.Outcome.FULFILLED));
         assertEq(reasons, 0);
         assertEq(book.claimable(ACTOR), BOND);
-        assertEq(book.claimable(BENEFICIARY), 0);
+        assertEq(book.claimable(beneficiary), 0);
 
         PromiseBook.PromiseRecord memory record = book.promiseOf(promiseId);
         PromiseCourt.Verdict memory verdict = court.verdictOf(promiseId);
@@ -257,7 +275,7 @@ contract PromiseCourtTest is TestBase {
         assertEq(uint256(outcome), uint256(PromiseBook.Outcome.BREACHED));
         assertEq(reasons, expected);
         assertEq(court.verdictOf(promiseId).reasonBits, expected);
-        assertEq(book.claimable(BENEFICIARY), PENALTY);
+        assertEq(book.claimable(beneficiary), PENALTY);
         assertEq(book.claimable(ACTOR), BOND - PENALTY);
     }
 
@@ -297,7 +315,7 @@ contract PromiseCourtTest is TestBase {
             | court.REASON_SHORT_SETTLEMENT();
         assertEq(uint256(outcome), uint256(PromiseBook.Outcome.BREACHED));
         assertEq(reasons, expected);
-        assertEq(book.claimable(BENEFICIARY), PENALTY);
+        assertEq(book.claimable(beneficiary), PENALTY);
     }
 
     function test_KindChainTermsAndZeroReferenceArePreVerificationRelevanceGates() public {
@@ -335,6 +353,24 @@ contract PromiseCourtTest is TestBase {
         zeroReference.quoteId = bytes32(0);
         vm.expectRevert(PromiseCourt.ZeroReferenceId.selector);
         court.proveRfqOutcome(rfqPromise, zeroReference, emptyContext, emptyInclusion, 0);
+        assertEq(verifier.verificationCalls(), 0);
+    }
+
+    function test_CourtRejectsKindCorrectPromiseWithDifferentPolicy() public {
+        PromiseCourt.RfqTerms memory terms = _rfqTerms();
+        bytes32 otherPolicy = keccak256("PROVER_PROMISE_RFQ_EXECUTED_EXPERIMENTAL");
+        system.SOURCE_REGISTRY()
+            .setSourceApproval(
+                uint8(PromiseBook.PromiseKind.RFQ_EXECUTION), CHAIN_KEY, address(source), otherPolicy, true
+            );
+        bytes32 promiseId = _openPromise(PromiseBook.PromiseKind.RFQ_EXECUTION, otherPolicy, court.rfqTermsHash(terms));
+        AttestcoinProofAdapter.BlockContext memory emptyContext;
+        AttestcoinProofAdapter.TransactionInclusion memory emptyInclusion;
+
+        vm.expectRevert(
+            abi.encodeWithSelector(PromiseCourt.UnsupportedPolicy.selector, court.RFQ_POLICY_ID(), otherPolicy)
+        );
+        court.proveRfqOutcome(promiseId, terms, emptyContext, emptyInclusion, 0);
         assertEq(verifier.verificationCalls(), 0);
     }
 
@@ -571,7 +607,7 @@ contract PromiseCourtTest is TestBase {
         vm.recordLogs();
         vm.prank(ACTOR);
         source.executeRfq(
-            promiseId, QUOTE_ID, BENEFICIARY, INPUT_TOKEN, OUTPUT_TOKEN, INPUT_AMOUNT, MIN_OUTPUT_AMOUNT, RECIPIENT
+            promiseId, QUOTE_ID, beneficiary, INPUT_TOKEN, OUTPUT_TOKEN, INPUT_AMOUNT, MIN_OUTPUT_AMOUNT, RECIPIENT
         );
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 1);
@@ -587,7 +623,7 @@ contract PromiseCourtTest is TestBase {
         source.executeRfq(
             promiseId,
             keccak256("new-quote"),
-            BENEFICIARY,
+            beneficiary,
             INPUT_TOKEN,
             OUTPUT_TOKEN,
             INPUT_AMOUNT,
@@ -606,35 +642,45 @@ contract PromiseCourtTest is TestBase {
     }
 
     function _openRfq(PromiseCourt.RfqTerms memory terms) private returns (bytes32 promiseId) {
-        bytes32 termsHash = court.rfqTermsHash(terms);
-        vm.prank(ACTOR);
-        promiseId = book.openPromise{ value: BOND }(
-            PromiseBook.PromiseKind.RFQ_EXECUTION,
-            BENEFICIARY,
-            CHAIN_KEY,
-            address(source),
-            VALID_FROM,
-            FULFILLMENT_DEADLINE,
-            PROOF_DEADLINE,
-            termsHash,
-            PENALTY
-        );
+        promiseId =
+            _openPromise(PromiseBook.PromiseKind.RFQ_EXECUTION, court.RFQ_POLICY_ID(), court.rfqTermsHash(terms));
     }
 
     function _openSettlement(PromiseCourt.SettlementTerms memory terms) private returns (bytes32 promiseId) {
-        bytes32 termsHash = court.settlementTermsHash(terms);
-        vm.prank(ACTOR);
-        promiseId = book.openPromise{ value: BOND }(
-            PromiseBook.PromiseKind.SETTLEMENT,
-            BENEFICIARY,
-            CHAIN_KEY,
-            address(source),
-            VALID_FROM,
-            FULFILLMENT_DEADLINE,
-            PROOF_DEADLINE,
-            termsHash,
-            PENALTY
+        promiseId = _openPromise(
+            PromiseBook.PromiseKind.SETTLEMENT, court.SETTLEMENT_POLICY_ID(), court.settlementTermsHash(terms)
         );
+    }
+
+    function _openPromise(PromiseBook.PromiseKind kind, bytes32 policyId, bytes32 termsHash)
+        private
+        returns (bytes32 promiseId)
+    {
+        uint64 entropyBlock = uint64(block.number + 2);
+        PromiseBook.DraftParams memory params = PromiseBook.DraftParams({
+            kind: kind,
+            beneficiary: beneficiary,
+            sourceChainKey: CHAIN_KEY,
+            sourceContract: address(source),
+            policyId: policyId,
+            adapterRevision: 1,
+            termsHash: termsHash,
+            activationLeadBlocks: 100,
+            fulfillmentWindowBlocks: 101,
+            proofSubmissionWindowBlocks: 100,
+            entropyBlock: entropyBlock,
+            activationDeadlineBlock: entropyBlock + 20,
+            fixedPenalty: PENALTY,
+            bond: BOND,
+            beneficiaryNonce: authorizationNonce++
+        });
+        bytes32 digest = book.draftAuthorizationDigest(ACTOR, params);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(BENEFICIARY_KEY, digest);
+        vm.prank(ACTOR);
+        bytes32 draftId = book.registerDraft{ value: BOND }(params, bytes.concat(r, s, bytes1(v)));
+        vm.roll(entropyBlock + book.MIN_ANCHOR_CONFIRMATIONS());
+        vm.setBlockhash(entropyBlock, keccak256(abi.encode(ENTROPY_HASH, draftId)));
+        promiseId = book.activateDraft(draftId);
     }
 
     function _proveRfq(
@@ -749,9 +795,9 @@ contract PromiseCourtTest is TestBase {
         });
     }
 
-    function _validRfqExecution() private pure returns (PromiseCourt.RfqExecution memory execution) {
+    function _validRfqExecution() private view returns (PromiseCourt.RfqExecution memory execution) {
         execution = PromiseCourt.RfqExecution({
-            beneficiary: BENEFICIARY,
+            beneficiary: beneficiary,
             inputToken: INPUT_TOKEN,
             outputToken: OUTPUT_TOKEN,
             inputAmount: INPUT_AMOUNT,

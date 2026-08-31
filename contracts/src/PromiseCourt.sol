@@ -21,6 +21,8 @@ contract PromiseCourt is AttestcoinProofAdapter {
         keccak256("RFQExecuted(bytes32,bytes32,address,address,address,address,uint256,uint256,address)");
     bytes32 public constant SETTLEMENT_RELEASED =
         keccak256("SettlementReleased(bytes32,bytes32,address,address,address,uint256)");
+    bytes32 public constant RFQ_POLICY_ID = keccak256("PROVER_PROMISE_RFQ_EXECUTED_V1");
+    bytes32 public constant SETTLEMENT_POLICY_ID = keccak256("PROVER_PROMISE_SETTLEMENT_RELEASED_V1");
 
     uint256 public constant REASON_LATE = 1;
     uint256 public constant REASON_WRONG_BENEFICIARY = 1 << 1;
@@ -96,6 +98,7 @@ contract PromiseCourt is AttestcoinProofAdapter {
     error PromiseNotFound(bytes32 promiseId);
     error PromiseAlreadyResolved(bytes32 promiseId, PromiseBook.Outcome outcome);
     error WrongPromiseKind(PromiseBook.PromiseKind expected, PromiseBook.PromiseKind actual);
+    error UnsupportedPolicy(bytes32 expected, bytes32 actual);
     error WrongSourceChain(uint64 expected, uint64 actual);
     error ZeroReferenceId();
     error ZeroTermsAddress();
@@ -146,7 +149,8 @@ contract PromiseCourt is AttestcoinProofAdapter {
         _validateRfqTerms(terms);
         return keccak256(
             abi.encode(
-                "PROMISE_COURT_RFQ_TERMS_V3",
+                "PROMISE_COURT_RFQ_TERMS_V4",
+                RFQ_POLICY_ID,
                 RFQ_EXECUTED,
                 "UNIQUE_FINAL_EVENT_PER_PROMISE_ID_AND_ACTOR",
                 terms.quoteId,
@@ -165,7 +169,8 @@ contract PromiseCourt is AttestcoinProofAdapter {
         _validateSettlementTerms(terms);
         return keccak256(
             abi.encode(
-                "PROMISE_COURT_SETTLEMENT_TERMS_V3",
+                "PROMISE_COURT_SETTLEMENT_TERMS_V4",
+                SETTLEMENT_POLICY_ID,
                 SETTLEMENT_RELEASED,
                 "UNIQUE_FINAL_EVENT_PER_PROMISE_ID_AND_ACTOR",
                 terms.settlementId,
@@ -184,8 +189,9 @@ contract PromiseCourt is AttestcoinProofAdapter {
         TransactionInclusion calldata inclusion,
         uint256 receiptLogOrdinal
     ) external nonReentrant returns (bytes32 evidenceId, PromiseBook.Outcome outcome, uint256 reasonBits) {
-        PromiseBook.PromiseRecord memory record =
-            _loadPromise(promiseId, PromiseBook.PromiseKind.RFQ_EXECUTION, context.chainKey, rfqTermsHash(terms));
+        PromiseBook.PromiseRecord memory record = _loadPromise(
+            promiseId, PromiseBook.PromiseKind.RFQ_EXECUTION, RFQ_POLICY_ID, context.chainKey, rfqTermsHash(terms)
+        );
 
         (VerifiedTransaction memory verified, EvmV1Decoder.LogEntry memory logEntry) = _authenticateEvent(
             promiseId, terms.quoteId, record, context, inclusion, receiptLogOrdinal, RFQ_EXECUTED, RFQ_EVENT_DATA_LENGTH
@@ -213,8 +219,13 @@ contract PromiseCourt is AttestcoinProofAdapter {
         TransactionInclusion calldata inclusion,
         uint256 receiptLogOrdinal
     ) external nonReentrant returns (bytes32 evidenceId, PromiseBook.Outcome outcome, uint256 reasonBits) {
-        PromiseBook.PromiseRecord memory record =
-            _loadPromise(promiseId, PromiseBook.PromiseKind.SETTLEMENT, context.chainKey, settlementTermsHash(terms));
+        PromiseBook.PromiseRecord memory record = _loadPromise(
+            promiseId,
+            PromiseBook.PromiseKind.SETTLEMENT,
+            SETTLEMENT_POLICY_ID,
+            context.chainKey,
+            settlementTermsHash(terms)
+        );
 
         (VerifiedTransaction memory verified, EvmV1Decoder.LogEntry memory logEntry) = _authenticateEvent(
             promiseId,
@@ -238,6 +249,7 @@ contract PromiseCourt is AttestcoinProofAdapter {
     function _loadPromise(
         bytes32 promiseId,
         PromiseBook.PromiseKind expectedKind,
+        bytes32 expectedPolicyId,
         uint64 sourceChainKey,
         bytes32 suppliedTermsHash
     ) private view returns (PromiseBook.PromiseRecord memory record) {
@@ -245,6 +257,9 @@ contract PromiseCourt is AttestcoinProofAdapter {
         if (record.terms.actor == address(0)) revert PromiseNotFound(promiseId);
         if (record.outcome != PromiseBook.Outcome.OPEN) revert PromiseAlreadyResolved(promiseId, record.outcome);
         if (record.terms.kind != expectedKind) revert WrongPromiseKind(expectedKind, record.terms.kind);
+        if (record.terms.policyId != expectedPolicyId) {
+            revert UnsupportedPolicy(expectedPolicyId, record.terms.policyId);
+        }
         if (sourceChainKey != record.terms.sourceChainKey) {
             revert WrongSourceChain(record.terms.sourceChainKey, sourceChainKey);
         }

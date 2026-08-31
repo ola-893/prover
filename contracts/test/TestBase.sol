@@ -9,6 +9,8 @@ interface Vm {
     }
 
     function prank(address msgSender) external;
+    function startPrank(address msgSender) external;
+    function stopPrank() external;
     function deal(address account, uint256 newBalance) external;
     function addr(uint256 privateKey) external returns (address keyAddr);
     function sign(uint256 privateKey, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
@@ -16,6 +18,8 @@ interface Vm {
     function expectRevert(bytes calldata revertData) external;
     function expectPartialRevert(bytes4 revertData) external;
     function warp(uint256 newTimestamp) external;
+    function roll(uint256 newHeight) external;
+    function setBlockhash(uint256 blockNumber, bytes32 blockHash) external;
     function recordLogs() external;
     function getRecordedLogs() external returns (Log[] memory entries);
 }
