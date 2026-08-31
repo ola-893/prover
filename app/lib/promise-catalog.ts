@@ -47,13 +47,13 @@ export const promiseCatalog: readonly PromiseCoverage[] = [
     eyebrow: 'Bonded execution',
     title: 'RFQ execution terms',
     promise:
-      'An actor self-posts exact assets, input, minimum output, recipient and source-height deadlines.',
+      'Actor and beneficiary authorize exact assets, input, minimum output, recipient, source policy and deadlines.',
     proof:
-      'One authenticated RFQExecuted event proves a matching fill or a wrong, short or late outcome.',
+      'A future-block-hash promise ID binds one authenticated RFQExecuted event to a prospective obligation.',
     consequence:
       'PromiseBook refunds the bond on fulfillment or credits the fixed penalty on breach.',
-    contractStatus: 'Contract-tested locally',
-    evidenceStatus: 'Contract fixtures · not deployed',
+    contractStatus: 'Authorized lifecycle tested locally',
+    evidenceStatus: 'Fixture source policy · not deployed',
     maturity: 'court-module',
     accent: 'lime',
   },
@@ -62,13 +62,13 @@ export const promiseCatalog: readonly PromiseCoverage[] = [
     eyebrow: 'Deal settlement',
     title: 'Settlement release',
     promise:
-      'An actor self-posts an exact asset, minimum amount, recipient and source-height deadlines.',
+      'Actor and beneficiary authorize an exact asset, minimum amount, recipient, source policy and deadlines.',
     proof:
-      'One authenticated SettlementReleased event proves a matching payment or a wrong, short or late outcome.',
+      'A future-block-hash promise ID binds one authenticated SettlementReleased event to the accepted draft.',
     consequence:
       'PromiseBook refunds the bond on fulfillment or credits the fixed penalty on breach.',
-    contractStatus: 'Contract-tested locally',
-    evidenceStatus: 'Contract fixtures · not deployed',
+    contractStatus: 'Authorized lifecycle tested locally',
+    evidenceStatus: 'Fixture source policy · not deployed',
     maturity: 'court-module',
     accent: 'violet',
   },

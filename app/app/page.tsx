@@ -189,8 +189,9 @@ function PromiseCoverageSection() {
           <p className="max-w-3xl text-sm leading-6 text-white/48 lg:justify-self-end">
             Ordering is the flagship: sandwich and FairExit turn Merkle position
             into a ruling. The same court pattern now classifies exact RFQ and
-            settlement events without pretending those local modules are already
-            deployed or bureau-trusted.
+            settlement events through mutually authorized, prospective promises—
+            without pretending those local modules are already deployed or
+            bureau-trusted.
           </p>
         </div>
 
@@ -215,11 +216,54 @@ function PromiseCoverageSection() {
             <span className="font-semibold text-white/68">
               Trust boundary.{' '}
             </span>
-            RFQ and settlement remain self-posted, contract-tested event
-            covenants. They stay outside the shared bureau until an approved
-            source adapter and beneficiary authorization make their outcomes
-            economically attributable.
+            RFQ and settlement drafts now require beneficiary EIP-712 or
+            EIP-1271 authorization, an approved source-policy revision and a
+            future CC3 block hash before activation. They stay outside the
+            shared bureau because the fixture emitter does not transfer assets
+            and no production adapter or live proof is deployed.
           </p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/8 bg-white/[0.025] p-4 sm:p-5">
+          <div className="grid gap-4 md:grid-cols-4">
+            {[
+              [
+                '01',
+                'Mutual authorization',
+                'The beneficiary signs every source, timing and economic field.',
+              ],
+              [
+                '02',
+                'Policy approval',
+                'Governance pins an exact chain, emitter, kind and schema revision.',
+              ],
+              [
+                '03',
+                'Prospective activation',
+                'A future CC3 block hash makes the final promise ID unknowable at registration.',
+              ],
+              [
+                '04',
+                'Typed resolution',
+                'One authenticated event fulfills or breaches the immutable promise.',
+              ],
+            ].map(([number, title, body]) => (
+              <div
+                key={number}
+                className="border-white/8 md:border-l md:pl-4 first:border-l-0 first:pl-0"
+              >
+                <p className="font-mono text-[9px] text-[#b8f34a]/70">
+                  {number}
+                </p>
+                <p className="mt-1 text-xs font-semibold text-white/72">
+                  {title}
+                </p>
+                <p className="mt-1.5 text-[11px] leading-5 text-white/38">
+                  {body}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

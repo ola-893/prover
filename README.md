@@ -13,7 +13,9 @@ The MVP leads with two claims that transaction ordering can prove particularly w
    can prove that request A preceded request B while B was processed before A, settle the bond, and
    pay the earlier requester.
 
-Two additional contract-tested modules extend the same evidence standard beyond ordering:
+Two additional contract-tested modules extend the same evidence standard beyond ordering. Their
+drafts are mutually authorized and only become promises after a future Creditcoin block hash makes
+the final promise ID unavailable at registration:
 
 3. **Bonded RFQ execution terms.** One exact `RFQExecuted` receipt event proves a matching outcome
    or classifies wrong beneficiary, asset, amount, recipient, short output, or positive lateness.
@@ -21,9 +23,11 @@ Two additional contract-tested modules extend the same evidence standard beyond 
    outcome or classifies wrong asset, recipient, short payment, or positive lateness.
 
 Those two modules are locally tested and not deployed. Their current demo emitter records events but
-does not transfer assets, and their promises are actor-authored rather than beneficiary-authorized.
-They therefore remain outside `PerformanceBureau` until approved source adapters and beneficiary
-authorization make the outcomes economically attributable.
+does not transfer assets. The lifecycle now requires beneficiary EIP-712/EIP-1271 authorization and
+a governance-approved source-policy revision, but the fixture source is still not an economically
+trusted production adapter. RFQ and settlement outcomes therefore remain outside `PerformanceBureau`
+until a reviewed source contract derives its events from real custody or execution and a native proof
+has been demonstrated end to end.
 
 The same record can also hold narrowly stated borrower evidence. The demonstration imports a public
 Ethereum Aave V3 Borrow and later self-funded Repay, derives a **self-repayment observation**, and
@@ -72,8 +76,9 @@ The browser fixtures are clearly labeled. A fixture is not presented as a live A
 | `PolicyV1` | Produces transparent experimental terms from the evidence vector. |
 | `DemoLender` | Freezes a quoted policy result into a demonstrative Creditcoin loan offer. |
 | `DemoExitVault` | Emits the unique, non-cancellable request/process schema required by the FairExit policy. |
-| `PromiseBook` | Holds self-bonded RFQ/settlement terms, enforces source-height evidence windows, resolves fulfilled/breached/proof-defaulted outcomes, and credits pull payments. |
-| `PromiseCourt` | Authenticates one exact RFQ or settlement receipt event and deterministically classifies matching, wrong, short, or late outcomes. |
+| `PromiseSourceRegistry` | Governance-approves exact promise kind, source chain, emitter and immutable policy tuples; every status change advances a revision. |
+| `PromiseBook` | Registers mutually authorized funded drafts, derives prospective promise IDs from future CC3 block hashes, enforces evidence windows, resolves outcomes, and credits pull payments. |
+| `PromiseCourt` | Authenticates one exact RFQ or settlement receipt event, requires its policy ID, and deterministically classifies matching, wrong, short, or late outcomes. |
 | `DemoPromiseSource` | Fixture-only event emitter with actor-scoped terminal-event uniqueness; it does not custody or transfer assets. |
 
 Production proof verification is pinned to Creditcoin's native verifier at `0x…0FD2`; covenant
@@ -143,6 +148,24 @@ absence, or complete history. A zero imported-liquidation count always means cov
 
 ### RFQ and settlement outcome modules
 
+An RFQ or settlement obligation now has a two-stage prospective lifecycle:
+
+1. The beneficiary signs nested EIP-712 `PromiseSource` and `PromiseSchedule` data. Every actor,
+   beneficiary, source, policy revision, terms commitment, timing field, penalty, bond and unordered
+   beneficiary nonce is covered. Deployed smart wallets are supported through EIP-1271.
+2. Governance must have approved the exact `(kind, sourceChainKey, sourceContract, policyId)` tuple.
+   A pending draft snapshots that approval revision; revocation or revoke/reapprove neutrally unwinds
+   the draft and refunds its bond. An active promise never consults mutable registry state again.
+3. The signed anchor is 2–64 Creditcoin blocks in the future. Anyone may activate from two
+   confirmations after that block through its signed deadline, never later than the 256-block
+   `BLOCKHASH` retention boundary.
+4. Activation derives the source-height windows from the latest attested tip and incorporates the
+   future block hash, activation attestation and draft commitment into the final promise ID. A source
+   terminal event must embed that final ID, so an ordinary actor cannot prepare it before draft
+   registration.
+5. Only activated promises affect actor statistics. An expired pending draft is a neutral refund,
+   not a breach or proof-submission default.
+
 Both paths first authenticate the exact V1 transaction and receipt bytes. The selected log must have
 the committed source chain, emitter, event signature, promise ID, reference ID, actor, topic count,
 data length, and successful receipt status. A mismatch in those relevance fields rejects the proof;
@@ -157,6 +180,13 @@ values from real custody or execution rather than caller-supplied claims.
 The generic proof-submission default is narrower: it says no acceptable fulfillment proof reached
 `PromiseBook` before the evidence window closed. It does not prove that no fulfillment transaction
 existed on the source chain.
+
+The future block hash is an unpredictability salt, not unbiased randomness or a universal clock. A
+Creditcoin block producer may influence or learn it early, and the source event can be emitted after
+the anchor is known but before the permissionless activation transaction is mined. The construction
+proves that the event could not contain the final ID before the accepted draft and its future anchor;
+it does not prove exact cross-chain wall-clock ordering. A later source-side activation event would
+provide the stronger handshake.
 
 ## Public Aave proof candidate
 
@@ -233,17 +263,21 @@ node --test scripts/verify-live-aave.test.mjs
 ## Security boundaries
 
 - Covenants cannot be edited, shortened, or cancelled after opening.
-- Coverage must begin at least 64 blocks beyond the latest attested tip; clients must also choose a
-  height beyond the live source head plus a safety margin because attestations may lag. The current
-  contracts do not causally prove that registration preceded a source event; a production version
-  needs a two-step source activation handshake.
+- RFQ and settlement drafts require exact beneficiary authorization, exact bond funding and an
+  approved source-policy revision. Unordered nonces prevent signature replay across concurrent deals;
+  EIP-712 domain separation prevents replay across books or settlement chains.
+- Activated RFQ and settlement coverage begins at least 64 blocks beyond the activation-time attested
+  tip. Their final ID includes a signed future CC3 anchor, preventing ordinary pre-registration event
+  backfill while stopping short of claiming exact cross-chain wall-clock ordering.
+- Registry changes invalidate pending drafts and permit a full neutral refund. They cannot rewrite or
+  strand already active promises.
 - Ruling replay is blocked in both the court and bond book.
 - Payouts use pull accounting. A revoked bureau permission cannot roll back an already settled bond.
 - Reporter permissions are scoped by evidence kind.
 - The demonstration's `1 CTC = 1 USDC` conversion is an explicit fixture, not an oracle claim.
-- Raw `PromiseBook.actorStats` are self-posted ledger statistics, not bureau-grade performance. Do
-  not use them for credit terms until source adapters are approved and beneficiaries authorize the
-  exact obligations.
+- Raw `PromiseBook.actorStats` are mutually authorized ledger statistics but are not automatically
+  bureau-grade. Do not use them for credit terms until governance approves an economically sound,
+  immutable source adapter and the native proof path is demonstrated.
 - Contracts have not been independently audited. Use them as hackathon software, not production
   financial infrastructure.
 
