@@ -65,6 +65,35 @@ The interactive demo at `app/` walks through:
 
 The browser fixtures are clearly labeled. A fixture is not presented as a live Attestcoin verdict.
 
+## Proof Router
+
+The landing page now starts evidence intake with **“What do you want to prove?”** A deterministic,
+client-side classifier suggests one of five specialist engines: sandwich ordering, FairExit FIFO,
+Aave performance, RFQ execution, or settlement. The grievance text never leaves the browser. The
+user confirms a route and sends only the exact covenant or promise ID and transaction coordinates to
+the read-only preflight endpoint.
+
+`POST /api/proof-router/preflight` then uses fixed public testnet endpoints and allowlisted deployed
+contracts to check:
+
+- whether a covenant or promise was activated before the incident;
+- whether the selected specialist, stored source commitment and source chain match;
+- whether the coverage and claim/proof windows remain open;
+- whether bond damages remain available;
+- whether fresh proof bundles reproduce their transaction indices from Merkle laterality; and
+- whether the supplied coordinates satisfy adjacency, global FIFO order, or source-height timing.
+
+Preflight is not adjudication. It never signs, broadcasts, slashes, pays, accuses, or updates the
+bureau. `ready_to_verify` means bounded proof-bundle summaries are available for the deployed
+specialist; that specialist must still decode authenticated receipts, enforce every policy-specific
+field, and issue the deterministic outcome. A missing prospective covenant returns “not enforceable
+through Prover” without publishing an unverified allegation. An open RFQ or settlement promise past
+its proof deadline is routed to default finalization rather than misreported as unenforceable.
+
+No private key, API key, user-supplied RPC URL, contract address, selector or arbitrary calldata is
+accepted by the router. The current owner-only deployment reduces testnet load; a public launch must
+add durable edge rate limiting before enabling unrestricted proof generation.
+
 ## Contracts
 
 | Contract | Responsibility |

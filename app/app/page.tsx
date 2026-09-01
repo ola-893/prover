@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 
 import { PerformanceDemo } from '@/components/performance-demo';
+import { ProofRouter } from '@/components/proof-router';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -40,7 +41,10 @@ export default function Home() {
             </div>
           </a>
 
-          <div className="hidden items-center gap-7 text-xs text-white/50 md:flex">
+          <div className="hidden items-center gap-7 text-xs text-white/50 xl:flex">
+            <a className="transition hover:text-white" href="#proof-router">
+              Proof router
+            </a>
             <a className="transition hover:text-white" href="#order-proofs">
               Order proofs
             </a>
@@ -145,6 +149,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ProofRouter />
 
       <LiveDeployment />
 
@@ -444,15 +450,15 @@ function SandwichFlagship() {
           <div className="mb-2 flex items-center gap-2">
             <span className="size-2 rounded-full bg-[#ff9f67] shadow-[0_0_12px_#ff9f67]" />
             <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#ffb389]">
-              Sandwich verdict
+              Sandwich proof · predicate demo
             </span>
           </div>
           <h2 className="text-xl font-semibold tracking-[-0.025em]">
-            No-sandwich covenant broken
+            How a no-sandwich covenant is broken
           </h2>
         </div>
         <Badge className="bg-[#ff9f67]/12 text-[#ffb389]">
-          3 proofs · 1 block
+          Illustrative · 3 proofs
         </Badge>
       </div>
 
@@ -469,7 +475,7 @@ function SandwichFlagship() {
           RLLLRRRR → 14 · authenticated receipt logs → same pool
         </p>
         <span className="text-xs font-semibold text-[#ffb389]">
-          front &lt; victim &lt; back ✓
+          candidate adjacency ✓
         </span>
       </div>
     </article>
@@ -484,15 +490,15 @@ function FairExitFlagship() {
           <div className="mb-2 flex items-center gap-2">
             <span className="size-2 rounded-full bg-[#78bfff] shadow-[0_0_12px_#78bfff]" />
             <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9dd0f5]">
-              FairExit verdict
+              FairExit proof · predicate demo
             </span>
           </div>
           <h2 className="text-xl font-semibold tracking-[-0.025em]">
-            FIFO exit covenant broken
+            How a FIFO exit covenant is broken
           </h2>
         </div>
         <Badge className="bg-[#78bfff]/10 text-[#a8d8f9]">
-          4 positive proofs
+          Illustrative · 4 proofs
         </Badge>
       </div>
 
@@ -515,7 +521,7 @@ function FairExitFlagship() {
           request A &lt; B · process B &lt; A
         </p>
         <span className="text-xs font-semibold text-[#9dd0f5]">
-          completed inversion ✓
+          candidate inversion ✓
         </span>
       </div>
     </article>
