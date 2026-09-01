@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "network": {
     "name": "Creditcoin CC3 Testnet",
     "chainId": 102031,
@@ -8,9 +8,10 @@
     "proofBuilderUrl": "https://prover.cc3-testnet.creditcoin.network"
   },
   "deploymentDate": "2026-08-29",
+  "lastUpdated": "2026-08-31",
   "administrator": {
     "address": "0xc7b11732DFba02C96DD7805E98db7E190Cbbc6E9",
-    "scope": "Testnet owner of PerformanceBureau and DemoLender",
+    "scope": "Testnet owner of PerformanceBureau and DemoLender; governor of PromiseSourceRegistry",
     "productionReady": false
   },
   "dependencies": {
@@ -68,6 +69,33 @@
       "deploymentTransaction": "0x8a3685900e60187876671e80ccbfc6c4ff050fa03f9e1dcfa8a287058c6ba6f9",
       "deploymentBlock": 5393481,
       "deploymentNonce": 11
+    },
+    "nativePromiseSystem": {
+      "address": "0x51FdFE7e3681cca8e8832e738742a295ce6c243E",
+      "runtimeBytes": 294,
+      "runtimeCodeHash": "0xce79d1ca52f23865ab85af43017b870786c8d94c8996846c250d95d05a219029",
+      "deploymentTransaction": "0x4e84a24dd68e878e68c95e82a6122825cd0d072321f53fe29ff319f074124004",
+      "deploymentBlock": 5404173,
+      "deploymentNonce": 68
+    },
+    "promiseSourceRegistry": {
+      "address": "0xC3Ed456882C7d5FA1103f8593AdCcd6afCc2B72b",
+      "runtimeBytes": 1690,
+      "runtimeCodeHash": "0xff4edd83187ef90917c7311cb9ce9caa939ade0b54bcde521fa1b90c66c797c7",
+      "createdBy": "nativePromiseSystem"
+    },
+    "promiseBook": {
+      "address": "0x15CC59C6c3781E4F6586A6458CDfa7006f1f4Cee",
+      "runtimeBytes": 15548,
+      "runtimeCodeHash": "0xbfceab78bb33347b89e4a6fd1a6516d9f8e37eb792ef4341fa80262c658a95ba",
+      "createdBy": "nativePromiseSystem"
+    },
+    "promiseCourt": {
+      "address": "0x41A8A301aef8e19FE604Cc6D24E65a37804CCDcd",
+      "runtimeBytes": 11619,
+      "runtimeCodeHash": "0x5ae5b72570eddc135ddc5c8d9bf8bd9b145913fe5575b4cdbc55870986a6b895",
+      "createdBy": "nativePromiseSystem",
+      "linkedDecoderAddressPresent": true
     }
   },
   "configuration": {
@@ -80,7 +108,33 @@
       "AaveRepay",
       "AaveSelfRepaymentObservation"
     ],
-    "aaveAdapterGrantTransaction": "0xc3869bc3940645a0356e9c8fa8545e5f414418440f968862944aeb62b6a3bc63"
+    "aaveAdapterGrantTransaction": "0xc3869bc3940645a0356e9c8fa8545e5f414418440f968862944aeb62b6a3bc63",
+    "promiseSourceApprovals": [
+      {
+        "kind": "RFQ_EXECUTION",
+        "kindValue": 0,
+        "sourceChainKey": 1,
+        "sourceContract": "0x035aA06263f4Ff06fF734f5556620473ac6982fc",
+        "policyId": "0xb978d3df77626726a2f97ab4868c290230777acacb8838ee73257c7c038e2b61",
+        "sourceKey": "0xa96b03cfdde90501779d3b3346e94cd540f72fdbb6aae4a6a590c3ac07792349",
+        "revision": 1,
+        "approved": true,
+        "approvalTransaction": "0xc64ab73feb67fb157bf527330ba200000d0c596492706412788d08da4301c0bf",
+        "approvalBlock": 5404288
+      },
+      {
+        "kind": "SETTLEMENT",
+        "kindValue": 1,
+        "sourceChainKey": 1,
+        "sourceContract": "0x035aA06263f4Ff06fF734f5556620473ac6982fc",
+        "policyId": "0x5155e763850602618ae4be11798d48cc6240a928740cfda92fa295f860c52a83",
+        "sourceKey": "0x1a3052a94545e960df0374639f4ec1d64c519b1eedeab4d23f1f8c3cfbfafeba",
+        "revision": 1,
+        "approved": true,
+        "approvalTransaction": "0x45bff5be566e2f2217d72d2a9607e914105a5e98436027a8589dfa5b3cf6c908",
+        "approvalBlock": 5404291
+      }
+    ]
   },
   "verification": {
     "allDeploymentReceiptsSucceeded": true,
@@ -88,6 +142,40 @@
     "nativeDependenciesMatch": true,
     "reporterMasksMatch": true,
     "decoderCodeHashMatches": true,
+    "promiseRuntimeArtifactVerification": {
+      "method": "Exact deployed-runtime comparison with Solidity immutable slots masked; the linked decoder address remains checked",
+      "allMatch": true,
+      "nativePromiseSystem": true,
+      "promiseSourceRegistry": true,
+      "promiseBook": true,
+      "promiseCourt": true,
+      "demoPromiseSource": true
+    },
+    "promiseFactoryChildren": {
+      "matchGetters": true,
+      "sourceRegistry": "0xC3Ed456882C7d5FA1103f8593AdCcd6afCc2B72b",
+      "promiseBook": "0x15CC59C6c3781E4F6586A6458CDfa7006f1f4Cee",
+      "promiseCourt": "0x41A8A301aef8e19FE604Cc6D24E65a37804CCDcd"
+    },
+    "promiseSystemWiring": {
+      "matches": true,
+      "registryGovernor": "0xc7b11732DFba02C96DD7805E98db7E190Cbbc6E9",
+      "promiseBookSourceRegistry": "0xC3Ed456882C7d5FA1103f8593AdCcd6afCc2B72b",
+      "promiseBookChainInfo": "0x0000000000000000000000000000000000000fD3",
+      "promiseBookCourt": "0x41A8A301aef8e19FE604Cc6D24E65a37804CCDcd",
+      "promiseCourtPromiseBook": "0x15CC59C6c3781E4F6586A6458CDfa7006f1f4Cee",
+      "promiseCourtNativeQueryVerifier": "0x0000000000000000000000000000000000000FD2",
+      "promiseCourtEvmV1Decoder": "0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f"
+    },
+    "promiseSourcePoliciesMatch": true,
+    "sepoliaAttesting": {
+      "confirmed": true,
+      "chainId": 11155111,
+      "attestcoinChainKey": 1,
+      "latestAttestedHeightObserved": 11604730,
+      "sourceHeadObserved": 11604769,
+      "demoPromiseSourceDeploymentBlockAttested": true
+    },
     "nativeCalculateTxIndexSmoke": {
       "laterality": [false, true],
       "expectedIndex": 2,
@@ -119,10 +207,29 @@
         }
       ]
     },
-    "liveAttestcoinProofSubmitted": false
+    "liveAttestcoinProofSubmitted": false,
+    "livePromiseOutcomeProofSubmitted": false
+  },
+  "sourceNetworks": {
+    "sepolia": {
+      "name": "Ethereum Sepolia",
+      "chainId": 11155111,
+      "attestcoinChainKey": 1,
+      "explorerUrl": "https://sepolia.etherscan.io",
+      "contracts": {
+        "demoPromiseSource": {
+          "address": "0x035aA06263f4Ff06fF734f5556620473ac6982fc",
+          "runtimeBytes": 1016,
+          "runtimeCodeHash": "0x3261ae5f84c3499163b5a9bbab93994ef67bf75db26f4d30b8db25d25374ccd7",
+          "deploymentTransaction": "0xb718c257769e2ce21f40d1e34be8fb335ead9f720aff9baef245c221b14ca8d2",
+          "deploymentBlock": 11603593,
+          "deploymentNonce": 37
+        }
+      }
+    }
   },
   "sourceFixture": {
     "demoExitVault": null,
-    "note": "Deploy separately to an Attestcoin-supported Ethereum source network."
+    "note": "DemoExitVault remains undeployed; deploy it separately to an Attestcoin-supported Ethereum source network."
   }
 }

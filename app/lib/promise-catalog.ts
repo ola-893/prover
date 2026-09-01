@@ -52,8 +52,8 @@ export const promiseCatalog: readonly PromiseCoverage[] = [
       'A future-block-hash promise ID binds one authenticated RFQExecuted event to a prospective obligation.',
     consequence:
       'PromiseBook refunds the bond on fulfillment or credits the fixed penalty on breach.',
-    contractStatus: 'Authorized lifecycle tested locally',
-    evidenceStatus: 'Fixture source policy · not deployed',
+    contractStatus: 'CC3 lifecycle live · policy r1 active',
+    evidenceStatus: 'Sepolia fixture · 0 native proofs/outcomes',
     maturity: 'court-module',
     accent: 'lime',
   },
@@ -67,8 +67,8 @@ export const promiseCatalog: readonly PromiseCoverage[] = [
       'A future-block-hash promise ID binds one authenticated SettlementReleased event to the accepted draft.',
     consequence:
       'PromiseBook refunds the bond on fulfillment or credits the fixed penalty on breach.',
-    contractStatus: 'Authorized lifecycle tested locally',
-    evidenceStatus: 'Fixture source policy · not deployed',
+    contractStatus: 'CC3 lifecycle live · policy r1 active',
+    evidenceStatus: 'Sepolia fixture · 0 native proofs/outcomes',
     maturity: 'court-module',
     accent: 'violet',
   },

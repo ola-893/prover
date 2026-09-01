@@ -2,6 +2,20 @@ export const cc3Deployment = {
   network: 'Creditcoin CC3 Testnet',
   chainId: 102031,
   explorer: 'https://creditcoin-testnet.blockscout.com',
+  promiseContracts: [
+    {
+      label: 'Promise Court',
+      address: '0x41A8A301aef8e19FE604Cc6D24E65a37804CCDcd',
+    },
+    {
+      label: 'Promise Book',
+      address: '0x15CC59C6c3781E4F6586A6458CDfa7006f1f4Cee',
+    },
+    {
+      label: 'Source Registry',
+      address: '0xC3Ed456882C7d5FA1103f8593AdCcd6afCc2B72b',
+    },
+  ],
   contracts: [
     {
       label: 'Ordering Court',
@@ -22,8 +36,25 @@ export const cc3Deployment = {
   ],
 } as const;
 
+export const sepoliaDeployment = {
+  network: 'Ethereum Sepolia',
+  chainId: 11155111,
+  attestcoinChainKey: 1,
+  explorer: 'https://sepolia.etherscan.io',
+  contracts: [
+    {
+      label: 'Demo Promise Source',
+      address: '0x035aA06263f4Ff06fF734f5556620473ac6982fc',
+    },
+  ],
+} as const;
+
 export function cc3AddressUrl(address: string) {
   return `${cc3Deployment.explorer}/address/${address}`;
+}
+
+export function sepoliaAddressUrl(address: string) {
+  return `${sepoliaDeployment.explorer}/address/${address}`;
 }
 
 export function shortAddress(address: string) {

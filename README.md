@@ -22,12 +22,13 @@ the final promise ID unavailable at registration:
 4. **Bonded settlement release.** One exact `SettlementReleased` receipt event proves a matching
    outcome or classifies wrong asset, recipient, short payment, or positive lateness.
 
-Those two modules are locally tested and not deployed. Their current demo emitter records events but
-does not transfer assets. The lifecycle now requires beneficiary EIP-712/EIP-1271 authorization and
-a governance-approved source-policy revision, but the fixture source is still not an economically
-trusted production adapter. RFQ and settlement outcomes therefore remain outside `PerformanceBureau`
-until a reviewed source contract derives its events from real custody or execution and a native proof
-has been demonstrated end to end.
+Those two modules are now live on CC3 testnet, with their fixture emitter deployed on Sepolia and the
+two exact source-policy tuples approved at revision 1. The emitter records unique terminal events but
+does not transfer or custody assets, and no live RFQ or settlement outcome proof has been submitted.
+The lifecycle requires beneficiary EIP-712/EIP-1271 authorization and an approved source-policy
+revision, but RFQ and settlement outcomes remain outside `PerformanceBureau` until a reviewed source
+contract derives its events from real custody or execution and a native proof has been demonstrated
+end to end.
 
 The same record can also hold narrowly stated borrower evidence. The demonstration imports a public
 Ethereum Aave V3 Borrow and later self-funded Repay, derives a **self-repayment observation**, and
@@ -81,8 +82,8 @@ The browser fixtures are clearly labeled. A fixture is not presented as a live A
 | `PromiseCourt` | Authenticates one exact RFQ or settlement receipt event, requires its policy ID, and deterministically classifies matching, wrong, short, or late outcomes. |
 | `DemoPromiseSource` | Fixture-only event emitter with actor-scoped terminal-event uniqueness; it does not custody or transfer assets. |
 
-Production proof verification is pinned to Creditcoin's native verifier at `0x…0FD2`; covenant
-height checks use ChainInfo at `0x…0FD3`. The production ordering deployer pins both addresses. The
+Production proof verification is pinned to Creditcoin's native verifier at `0x…0FD2`; covenant and
+promise height checks use ChainInfo at `0x…0FD3`. Both native court deployers pin those addresses. The
 vendored EVM decoder requires the canonical CC3 library at
 `0x731c345d79Fb8BbDC541f9DF3b6317585F849F9f` when deploying linked production bytecode.
 
@@ -97,6 +98,10 @@ The court infrastructure is deployed on Creditcoin CC3 testnet (chain ID `102031
 | Performance Bureau | [`0x8Ef418F6E740950cAd8C4fa22A4F7B7990B00D74`](https://creditcoin-testnet.blockscout.com/address/0x8Ef418F6E740950cAd8C4fa22A4F7B7990B00D74) |
 | Native Aave Evidence Adapter | [`0xDff00fde3829fFcA7A1dCAB0AA30602dd9F380A4`](https://creditcoin-testnet.blockscout.com/address/0xDff00fde3829fFcA7A1dCAB0AA30602dd9F380A4) |
 | Demo Lender | [`0xb6A6858C7BBb755c2AD014d07583369278078F71`](https://creditcoin-testnet.blockscout.com/address/0xb6A6858C7BBb755c2AD014d07583369278078F71) |
+| Native Promise System | [`0x51FdFE7e3681cca8e8832e738742a295ce6c243E`](https://creditcoin-testnet.blockscout.com/address/0x51FdFE7e3681cca8e8832e738742a295ce6c243E) |
+| Promise Source Registry | [`0xC3Ed456882C7d5FA1103f8593AdCcd6afCc2B72b`](https://creditcoin-testnet.blockscout.com/address/0xC3Ed456882C7d5FA1103f8593AdCcd6afCc2B72b) |
+| Promise Book | [`0x15CC59C6c3781E4F6586A6458CDfa7006f1f4Cee`](https://creditcoin-testnet.blockscout.com/address/0x15CC59C6c3781E4F6586A6458CDfa7006f1f4Cee) |
+| Promise Court | [`0x41A8A301aef8e19FE604Cc6D24E65a37804CCDcd`](https://creditcoin-testnet.blockscout.com/address/0x41A8A301aef8e19FE604Cc6D24E65a37804CCDcd) |
 
 The sanitized [deployment manifest](./contracts/deployments/cc3-testnet.json) records transaction
 hashes, runtime code hashes, child wiring, dependency addresses and reporter masks. Deployment proves
@@ -104,9 +109,11 @@ the infrastructure is live; it does not turn browser fixtures into live Attestco
 keyless preflight below now fetches real proof-builder payloads and passes them through the deployed
 native verifier with `eth_call`; persisting those facts is a separate state-changing transaction.
 
-`PromiseBook`, `PromiseCourt`, and `DemoPromiseSource` are not part of this live deployment table.
-They currently pass the local contract suite using authenticated-proof mocks; no native RFQ or
-settlement proof has been submitted and no live outcome has been recorded for them.
+The fixture `DemoPromiseSource` is separately live on Ethereum Sepolia (Attestcoin chain key `1`) at
+[`0x035aA06263f4Ff06fF734f5556620473ac6982fc`](https://sepolia.etherscan.io/address/0x035aA06263f4Ff06fF734f5556620473ac6982fc).
+The registry approves only this emitter's exact RFQ and settlement policy IDs, each at revision 1.
+Deployment and approval are not outcome evidence: no native RFQ or settlement proof has been
+submitted and no live outcome has been recorded.
 
 ## Exactly what the predicates establish
 

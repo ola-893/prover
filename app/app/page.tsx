@@ -10,7 +10,13 @@ import {
 import { PerformanceDemo } from '@/components/performance-demo';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
-import { cc3AddressUrl, cc3Deployment, shortAddress } from '@/lib/deployment';
+import {
+  cc3AddressUrl,
+  cc3Deployment,
+  sepoliaAddressUrl,
+  sepoliaDeployment,
+  shortAddress,
+} from '@/lib/deployment';
 import { promiseCatalog, type PromiseCoverage } from '@/lib/promise-catalog';
 
 export default function Home() {
@@ -188,10 +194,10 @@ function PromiseCoverageSection() {
           </div>
           <p className="max-w-3xl text-sm leading-6 text-white/48 lg:justify-self-end">
             Ordering is the flagship: sandwich and FairExit turn Merkle position
-            into a ruling. The same court pattern now classifies exact RFQ and
-            settlement events through mutually authorized, prospective promises—
-            without pretending those local modules are already deployed or
-            bureau-trusted.
+            into a ruling. The deployed CC3 lifecycle now classifies exact RFQ
+            and settlement events through mutually authorized, prospective
+            promises; both Sepolia fixture policies are active at revision 1,
+            with zero native proofs or outcomes and no bureau trust yet.
           </p>
         </div>
 
@@ -216,11 +222,11 @@ function PromiseCoverageSection() {
             <span className="font-semibold text-white/68">
               Trust boundary.{' '}
             </span>
-            RFQ and settlement drafts now require beneficiary EIP-712 or
-            EIP-1271 authorization, an approved source-policy revision and a
-            future CC3 block hash before activation. They stay outside the
-            shared bureau because the fixture emitter does not transfer assets
-            and no production adapter or live proof is deployed.
+            RFQ and settlement drafts require beneficiary EIP-712 or EIP-1271
+            authorization, an approved source-policy revision and a future CC3
+            block hash before activation. They stay outside the shared bureau:
+            the Sepolia fixture emitter neither custodies nor transfers assets,
+            and no native RFQ or settlement proof has produced a live outcome.
           </p>
         </div>
 
@@ -344,6 +350,24 @@ function PromiseCard({ item }: { item: PromiseCoverage }) {
 }
 
 function LiveDeployment() {
+  const deployments = [
+    ...cc3Deployment.promiseContracts.map((contract) => ({
+      ...contract,
+      href: cc3AddressUrl(contract.address),
+      network: `CC3 · ${cc3Deployment.chainId}`,
+    })),
+    ...sepoliaDeployment.contracts.map((contract) => ({
+      ...contract,
+      href: sepoliaAddressUrl(contract.address),
+      network: `Sepolia · source key ${sepoliaDeployment.attestcoinChainKey}`,
+    })),
+    ...cc3Deployment.contracts.map((contract) => ({
+      ...contract,
+      href: cc3AddressUrl(contract.address),
+      network: `CC3 · ${cc3Deployment.chainId}`,
+    })),
+  ];
+
   return (
     <section
       id="deployment"
@@ -353,24 +377,41 @@ function LiveDeployment() {
         <div>
           <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] text-[#b8f34a]">
             <span className="size-2 rounded-full bg-[#b8f34a] shadow-[0_0_12px_#b8f34a]" />
-            Contracts live · chain {cc3Deployment.chainId}
+            Contracts live · CC3 + Sepolia
           </div>
           <h2 className="mt-2 text-xl font-semibold tracking-[-0.025em]">
-            The court infrastructure is deployed on CC3 testnet.
+            The promise lifecycle and its fixture source are deployed.
           </h2>
           <p className="mt-2 max-w-xl text-xs leading-5 text-white/42">
-            Native verifier and ChainInfo wiring, factory children, decoder
-            link, ownership and least-privilege reporter masks were checked
-            on-chain. The browser verdicts remain labeled fixtures until live
-            proof payloads are submitted.
+            Promise Court, Promise Book and Source Registry are live on CC3
+            testnet. The exact RFQ and settlement tuples for Attestcoin source
+            chain key {sepoliaDeployment.attestcoinChainKey} are approved at
+            revision 1 against the Sepolia fixture emitter.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Badge className="border border-[#b8f34a]/18 bg-[#b8f34a]/8 text-[#c9fa72]">
+              RFQ policy · r1 active
+            </Badge>
+            <Badge className="border border-[#b8f34a]/18 bg-[#b8f34a]/8 text-[#c9fa72]">
+              Settlement policy · r1 active
+            </Badge>
+            <Badge className="border border-white/8 bg-white/[0.035] text-white/45">
+              0 native proofs · 0 outcomes
+            </Badge>
+          </div>
+          <p className="mt-3 max-w-xl text-[11px] leading-5 text-white/32">
+            Activation is infrastructure, not a verdict. The demo emitter does
+            not custody or transfer assets, no live native RFQ or settlement
+            proof has resolved a promise, and these modules are not
+            bureau-trusted.
           </p>
         </div>
 
         <div className="grid gap-2 sm:grid-cols-2">
-          {cc3Deployment.contracts.map((contract) => (
+          {deployments.map((contract) => (
             <a
               key={contract.address}
-              href={cc3AddressUrl(contract.address)}
+              href={contract.href}
               target="_blank"
               rel="noreferrer"
               className="group flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.035] px-3.5 py-3 transition hover:border-[#b8f34a]/25 hover:bg-white/[0.065]"
@@ -381,6 +422,9 @@ function LiveDeployment() {
                 </span>
                 <span className="mt-1 block font-mono text-[9px] text-white/30">
                   {shortAddress(contract.address)}
+                </span>
+                <span className="mt-1 block text-[8px] font-semibold uppercase tracking-[0.1em] text-white/20">
+                  {contract.network}
                 </span>
               </span>
               <ExternalLink className="size-3.5 text-white/25 transition group-hover:text-[#b8f34a]" />
