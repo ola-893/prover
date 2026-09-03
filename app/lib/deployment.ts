@@ -33,6 +33,10 @@ export const cc3Deployment = {
       label: 'Aave Adapter',
       address: '0xDff00fde3829fFcA7A1dCAB0AA30602dd9F380A4',
     },
+    {
+      label: 'Bureau Evidence SBT',
+      address: '0x59e4aba6868f475D572E0c491d92223F4141D442',
+    },
   ],
 } as const;
 

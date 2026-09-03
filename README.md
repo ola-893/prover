@@ -102,6 +102,7 @@ add durable edge rate limiting before enabling unrestricted proof generation.
 | `OrderingCourt` | Applies policy-bound sandwich and FIFO predicates, persists rulings, and asks the bond book to settle them. |
 | `CovenantBook` | Holds immutable native-CTC bonds, enforces future coverage windows, and credits pull payments. |
 | `PerformanceBureau` | Stores reporter-scoped, replay-safe evidence records and per-address evidence vectors. |
+| `BureauEvidenceSBT` | Permissionlessly mints non-transferable ERC-5192 display receipts from terminal Bureau records while leaving the Bureau and originating proof engines canonical. |
 | `AaveEvidenceAdapter` | Decodes exact Aave V3 USDC Borrow/Repay receipt ordinals and derives a narrow self-repayment observation; its production subclass pins the native verifier. |
 | `PolicyV1` | Produces transparent experimental terms from the evidence vector. |
 | `DemoLender` | Freezes a quoted policy result into a demonstrative Creditcoin loan offer. |
@@ -131,6 +132,7 @@ The court infrastructure is deployed on Creditcoin CC3 testnet (chain ID `102031
 | Promise Source Registry | [`0xC3Ed456882C7d5FA1103f8593AdCcd6afCc2B72b`](https://creditcoin-testnet.blockscout.com/address/0xC3Ed456882C7d5FA1103f8593AdCcd6afCc2B72b) |
 | Promise Book | [`0x15CC59C6c3781E4F6586A6458CDfa7006f1f4Cee`](https://creditcoin-testnet.blockscout.com/address/0x15CC59C6c3781E4F6586A6458CDfa7006f1f4Cee) |
 | Promise Court | [`0x41A8A301aef8e19FE604Cc6D24E65a37804CCDcd`](https://creditcoin-testnet.blockscout.com/address/0x41A8A301aef8e19FE604Cc6D24E65a37804CCDcd) |
+| Bureau Evidence SBT | [`0x59e4aba6868f475D572E0c491d92223F4141D442`](https://creditcoin-testnet.blockscout.com/address/0x59e4aba6868f475D572E0c491d92223F4141D442) |
 
 The sanitized [deployment manifest](./contracts/deployments/cc3-testnet.json) records transaction
 hashes, runtime code hashes, child wiring, dependency addresses and reporter masks. Deployment proves
@@ -143,6 +145,45 @@ The fixture `DemoPromiseSource` is separately live on Ethereum Sepolia (Attestco
 The registry approves only this emitter's exact RFQ and settlement policy IDs, each at revision 1.
 Deployment and approval are not outcome evidence: no native RFQ or settlement proof has been
 submitted and no live outcome has been recorded.
+
+### Evidence portability receipt
+
+`BureauEvidenceSBT` is a standalone, adminless ERC-5192 mirror. It was deployed at CC3 block
+`5,413,260` by transaction
+[`0xc4b99c99dedeed78d981fce68d049920cb37e98c3b0e60ae7dcaf4b9d7ca5563`](https://creditcoin-testnet.blockscout.com/tx/0xc4b99c99dedeed78d981fce68d049920cb37e98c3b0e60ae7dcaf4b9d7ca5563)
+with deployer nonce `84`. Its runtime is `19,874` bytes with code hash
+`0xae4fdd37bcd07512be84ca16cdebfeecae3b1456482d2cfe0eb3b8901e8adea3`.
+The deployment did not upgrade, reconfigure, or write to any existing Prover contract.
+
+Anyone may pay CC3 gas to mint the one receipt for an eligible, already-recorded evidence ID. The
+contract first reads and cross-checks the canonical `PerformanceBureau`, `OrderingCourt`,
+`CovenantBook`, and native Aave adapter records; it cannot create a verdict, proof, payout, reporter
+permission, or reputation change. A breach receipt is minted to the proof-derived affected user,
+while the responsible operator remains the metadata `subject` and the payout recipient remains the
+metadata `beneficiary`. A positive receipt is minted to the subject of the proven bounded Aave
+self-repayment observation. Transfers, approvals, burns, and unlocks are unavailable.
+
+Only terminal Bureau kinds are eligible: the bounded Aave self-repayment observation, sandwich
+breach, and FIFO breach. Raw Aave Borrow/Repay facts, liquidation facts, and RFQ or settlement
+Promise outcomes are unsupported. Aave receipts retain the two authenticated source coordinates.
+Ordering receipts expose the ruling's breach height, but their transaction-index fields are `null`
+because the already-deployed court does not retain the constituent ordering indices or source
+transaction hashes.
+
+The public wiring and bytecode can be reproduced without a signing key:
+
+```sh
+RPC=https://rpc.cc3-testnet.creditcoin.network
+EVIDENCE_SBT=0x59e4aba6868f475D572E0c491d92223F4141D442
+
+cast codesize "$EVIDENCE_SBT" --rpc-url "$RPC"
+cast codehash "$EVIDENCE_SBT" --rpc-url "$RPC"
+cast call "$EVIDENCE_SBT" 'PERFORMANCE_BUREAU()(address)' --rpc-url "$RPC"
+cast call "$EVIDENCE_SBT" 'ORDERING_COURT()(address)' --rpc-url "$RPC"
+cast call "$EVIDENCE_SBT" 'AAVE_ADAPTER()(address)' --rpc-url "$RPC"
+cast call "$EVIDENCE_SBT" 'COVENANT_BOOK()(address)' --rpc-url "$RPC"
+cast call "$EVIDENCE_SBT" 'supportsInterface(bytes4)(bool)' 0xb45a3c0e --rpc-url "$RPC"
+```
 
 ## Exactly what the predicates establish
 
@@ -269,6 +310,8 @@ persist them because ingestion is permissionless; the testnet administrator key 
 Requirements: Node.js 22+, npm, and Foundry.
 
 ```bash
+git submodule update --init --recursive
+
 # Frontend
 cd app
 npm ci

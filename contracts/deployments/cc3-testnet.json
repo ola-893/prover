@@ -8,7 +8,7 @@
     "proofBuilderUrl": "https://prover.cc3-testnet.creditcoin.network"
   },
   "deploymentDate": "2026-08-29",
-  "lastUpdated": "2026-08-31",
+  "lastUpdated": "2026-09-01",
   "administrator": {
     "address": "0xc7b11732DFba02C96DD7805E98db7E190Cbbc6E9",
     "scope": "Testnet owner of PerformanceBureau and DemoLender; governor of PromiseSourceRegistry",
@@ -61,6 +61,22 @@
       "deploymentBlock": 5393478,
       "deploymentNonce": 10,
       "linkedDecoderAddressPresent": true
+    },
+    "bureauEvidenceSbt": {
+      "address": "0x59e4aba6868f475D572E0c491d92223F4141D442",
+      "runtimeBytes": 19874,
+      "runtimeCodeHash": "0xae4fdd37bcd07512be84ca16cdebfeecae3b1456482d2cfe0eb3b8901e8adea3",
+      "deploymentTransaction": "0xc4b99c99dedeed78d981fce68d049920cb37e98c3b0e60ae7dcaf4b9d7ca5563",
+      "deploymentBlock": 5413260,
+      "deploymentNonce": 84,
+      "standard": "ERC-5192",
+      "adminless": true,
+      "permissionlessMint": true,
+      "tokensMintedAtDeployment": 0,
+      "canonicalEvidenceSource": "performanceBureau",
+      "pinnedOrderingCourt": "0xc01f7E27D4D712241B1cAAD972E0FC589146c5Ff",
+      "pinnedCovenantBook": "0x66aF3e9Ad07A236b29de7ad07083C037a4244223",
+      "pinnedAaveEvidenceAdapter": "0xDff00fde3829fFcA7A1dCAB0AA30602dd9F380A4"
     },
     "demoLender": {
       "address": "0xb6A6858C7BBb755c2AD014d07583369278078F71",
@@ -142,6 +158,13 @@
     "nativeDependenciesMatch": true,
     "reporterMasksMatch": true,
     "decoderCodeHashMatches": true,
+    "bureauEvidenceSbt": {
+      "receiptSucceeded": true,
+      "runtimeCodeHashMatches": true,
+      "immutableDependenciesMatch": true,
+      "erc5192InterfaceSupported": true,
+      "existingProtocolWrites": 0
+    },
     "promiseRuntimeArtifactVerification": {
       "method": "Exact deployed-runtime comparison with Solidity immutable slots masked; the linked decoder address remains checked",
       "allMatch": true,

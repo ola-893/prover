@@ -3,7 +3,8 @@
 The production MVP is split across two networks:
 
 - `PerformanceBureau`, both bonded court systems, the native Aave adapter, `PromiseBook`,
-  `PromiseSourceRegistry`, and `DemoLender` deploy to Creditcoin CC3.
+  `PromiseSourceRegistry`, `DemoLender`, and the standalone `BureauEvidenceSBT` deploy to Creditcoin
+  CC3.
 - `DemoExitVault` and `DemoPromiseSource` are source fixtures and must deploy separately to an
   Attestcoin-supported Ethereum network. Deploying either to CC3 would not create valid
   Ethereum-source evidence.
@@ -124,6 +125,81 @@ cast send --rpc-url "$RPC" --chain 102031 --interactive "$BUREAU" \
   'setReporterPermissions(address,uint256)' "$AAVE_ADAPTER" 7
 ```
 
+## Standalone ERC-5192 evidence receipt
+
+The final adminless portability layer is deployed independently of the original system:
+
+| Field | Value |
+| --- | --- |
+| Contract | `BureauEvidenceSBT` |
+| Address | `0x59e4aba6868f475D572E0c491d92223F4141D442` |
+| Deployment transaction | `0xc4b99c99dedeed78d981fce68d049920cb37e98c3b0e60ae7dcaf4b9d7ca5563` |
+| CC3 block | `5,413,260` |
+| Deployer nonce | `84` |
+| Runtime size | `19,874` bytes |
+| Runtime code hash | `0xae4fdd37bcd07512be84ca16cdebfeecae3b1456482d2cfe0eb3b8901e8adea3` |
+
+Its constructor pins the deployed Bureau, Ordering Court, the Court's Covenant Book, and the native
+Aave adapter. It checks that both reporters point back to the same canonical Bureau. Deployment is a
+single new-contract creation: it does not upgrade, authorize, reconfigure, or write to any existing
+contract, and the receipt contract has no owner or administrator.
+
+`mintFromEvidence(bytes32)` is permissionless, but issuance is not. A successful mint requires a
+terminal evidence ID already recorded in `PerformanceBureau` and exact agreement with its fixed
+originating reporter records. The contract cannot create evidence, verdicts, payouts, permissions,
+or profile changes. It supports only:
+
+- a bounded Aave self-repayment observation, minted to its proven subject;
+- a sandwich-breach ruling, minted to the proof-derived affected user; and
+- a FIFO-breach ruling, minted to the proof-derived affected user.
+
+For breach receipts the operator remains the metadata subject, while claimant is explicitly the
+proof-derived affected user—not necessarily the proof submitter or payout beneficiary. Raw Aave
+facts and all RFQ/settlement Promise outcomes are rejected. Ordering source transaction indices and
+hashes remain `null` because the already-deployed court did not retain those constituent fields;
+the SBT does not invent them.
+
+The source includes `DeployCc3EvidenceSbt.s.sol` as a chain- and code-hash-pinned deployment
+specification. For a key-safe manual deployment from `contracts/`, use Foundry's interactive signer
+instead of placing a secret in the command or repository:
+
+```sh
+BUREAU=0x8Ef418F6E740950cAd8C4fa22A4F7B7990B00D74
+ORDERING_COURT=0xc01f7E27D4D712241B1cAAD972E0FC589146c5Ff
+AAVE_ADAPTER=0xDff00fde3829fFcA7A1dCAB0AA30602dd9F380A4
+
+forge create --rpc-url "$RPC" --chain 102031 --interactive --broadcast \
+  src/BureauEvidenceSBT.sol:BureauEvidenceSBT \
+  --constructor-args "$BUREAU" "$ORDERING_COURT" "$AAVE_ADAPTER"
+```
+
+Verify the final deployment with read-only calls:
+
+```sh
+EVIDENCE_SBT=0x59e4aba6868f475D572E0c491d92223F4141D442
+
+cast codesize "$EVIDENCE_SBT" --rpc-url "$RPC"
+cast codehash "$EVIDENCE_SBT" --rpc-url "$RPC"
+cast call "$EVIDENCE_SBT" 'PERFORMANCE_BUREAU()(address)' --rpc-url "$RPC"
+cast call "$EVIDENCE_SBT" 'ORDERING_COURT()(address)' --rpc-url "$RPC"
+cast call "$EVIDENCE_SBT" 'AAVE_ADAPTER()(address)' --rpc-url "$RPC"
+cast call "$EVIDENCE_SBT" 'COVENANT_BOOK()(address)' --rpc-url "$RPC"
+cast call "$EVIDENCE_SBT" 'supportsInterface(bytes4)(bool)' 0xb45a3c0e --rpc-url "$RPC"
+```
+
+Expected results are the three fixed reporter/Bureau addresses above, Covenant Book
+`0x66aF3e9Ad07A236b29de7ad07083C037a4244223`, ERC-5192 support `true`, runtime size `19874`, and the
+published runtime hash. To mint an eligible record, first confirm it exists, then use any funded CC3
+account; the token recipient is derived from canonical evidence rather than the transaction sender:
+
+```sh
+EVIDENCE_ID=<already-recorded terminal Bureau evidence ID>
+
+cast call "$BUREAU" 'evidenceRecorded(bytes32)(bool)' "$EVIDENCE_ID" --rpc-url "$RPC"
+cast send --rpc-url "$RPC" --chain 102031 --interactive "$EVIDENCE_SBT" \
+  'mintFromEvidence(bytes32)' "$EVIDENCE_ID"
+```
+
 Run from `contracts/`. Dry-run each `forge create` first by supplying `--from` with the public
 deployer address and omitting `--broadcast`. After broadcasting, verify the deployed bytecode,
 ownership, native dependency addresses, and reporter masks before publishing a manifest.
@@ -153,6 +229,8 @@ Use read-only RPC calls to confirm all of the following before publishing addres
 8. The canonical decoder still has the pinned runtime code hash above.
 9. A captured Attestcoin proof succeeds in a separate integration smoke test. Contract deployment
    alone is not evidence that the external proof builder produced a valid proof.
+10. `BureauEvidenceSBT` has the published runtime size and code hash, points to the published Bureau,
+    Ordering Court, Covenant Book, and Aave adapter, and reports ERC-5192 interface support.
 
 ## Keyless live-proof preflight
 

@@ -386,7 +386,8 @@ function LiveDeployment() {
             Contracts live · CC3 + Sepolia
           </div>
           <h2 className="mt-2 text-xl font-semibold tracking-[-0.025em]">
-            The promise lifecycle and its fixture source are deployed.
+            The promise lifecycle, evidence mirror and fixture source are
+            deployed.
           </h2>
           <p className="mt-2 max-w-xl text-xs leading-5 text-white/42">
             Promise Court, Promise Book and Source Registry are live on CC3
@@ -404,12 +405,21 @@ function LiveDeployment() {
             <Badge className="border border-white/8 bg-white/[0.035] text-white/45">
               0 native proofs · 0 outcomes
             </Badge>
+            <Badge className="border border-[#b8f34a]/18 bg-[#b8f34a]/8 text-[#c9fa72]">
+              Soulbound evidence mirror · live
+            </Badge>
           </div>
           <p className="mt-3 max-w-xl text-[11px] leading-5 text-white/32">
             Activation is infrastructure, not a verdict. The demo emitter does
             not custody or transfer assets, no live native RFQ or settlement
             proof has resolved a promise, and these modules are not
             bureau-trusted.
+          </p>
+          <p className="mt-2 max-w-xl text-[11px] leading-5 text-white/32">
+            The live soulbound token is a non-transferable display mirror of an
+            existing Performance Bureau record. It creates no verdict and does
+            not replace the bureau or originating court or adapter as the
+            canonical evidence source.
           </p>
         </div>
 
