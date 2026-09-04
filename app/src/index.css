@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-paper: #FAF9F6;
+  --color-ink: #111111;
+  --color-accent-red: #D43F3F;
+  --color-accent-green: #1B8A5A;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #FAF9F6;
+  color: #111111;
+  overflow-x: hidden;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Subtle newspaper / blueprint grid background */
+.grid-paper {
+  background-color: #FAF9F6;
+  background-image: 
+    linear-gradient(to right, rgba(17, 17, 17, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(17, 17, 17, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.terminal-scroll::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.terminal-scroll::-webkit-scrollbar-track {
+  background: #FAF9F6;
+}
+.terminal-scroll::-webkit-scrollbar-thumb {
+  background: #CCCCCC;
+}
+.terminal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #111111;
+}
+
