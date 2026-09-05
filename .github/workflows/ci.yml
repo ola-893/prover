@@ -16,10 +16,12 @@ jobs:
         working-directory: contracts
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: foundry-rs/foundry-toolchain@v1
       - run: forge fmt --check
       - run: forge test
-      - run: forge build --sizes
+      - run: forge build --sizes --skip script
 
   frontend:
     runs-on: ubuntu-latest
@@ -36,4 +38,6 @@ jobs:
       - run: npm ci
       - name: Type-check product sources
         run: npm run lint
+      - name: Test proof utilities
+        run: node --test ../scripts/verify-live-aave.test.mjs ../scripts/leaderboard-watcher.test.mjs
       - run: npm run build

@@ -305,6 +305,35 @@ The current live preflight returns:
 Those IDs are predictions until the calls are broadcast and mined. A fresh funded CC3 submitter can
 persist them because ingestion is permissionless; the testnet administrator key is not required.
 
+## Background borrower watcher
+
+`scripts/leaderboard-watcher.mjs` is the bounded background path for borrower evidence. It observes
+only an explicit list of public Aave addresses, finds a USDC Borrow followed at least 32 Ethereum
+blocks later by a same-or-larger self-funded Repay, fetches Attestcoin proofs, independently checks
+Merkle-derived transaction positions, and submits the adapter facts plus the derived observation.
+The contract remains the final authority: the watcher merely proposes source transactions; the
+native adapter re-authenticates the receipt bytes and applies the predicate on CC3.
+
+It never infers a clean history from an absence of events and it is not an Ethereum-wide credit
+scraper. A watchlist entry must include the earliest source block to inspect:
+
+```bash
+export ETHEREUM_RPC_URL=https://your-ethereum-rpc.example
+export PROVER_BORROWER_WATCHLIST=0x5D99551ce4a2c1467aDF632474424E7e22c72C66@25854707
+
+# Read, validate, and simulate only. This is the default and needs no signer.
+node scripts/leaderboard-watcher.mjs
+
+# Submit only after placing a funded CC3 signer in the local environment.
+node scripts/leaderboard-watcher.mjs --submit
+```
+
+The scheduled GitHub Action in `.github/workflows/leaderboard-watcher.yml` is inert until these
+repository secrets exist: `PROVER_ETHEREUM_RPC_URL`, `CREDITCOIN_PRIVATE_KEY`, and
+`PROVER_BORROWER_WATCHLIST`. It runs every 15 minutes after configuration; no credential is stored
+in the repository. The frontend then reads the resulting canonical CC3 evidence directly and
+refreshes the board every 30 seconds.
+
 ## Local development
 
 Requirements: Node.js 22+, npm, and Foundry.
@@ -331,12 +360,11 @@ forge test
 forge build --sizes --skip script
 
 cd ../app
-npx oxlint app/page.tsx components/performance-demo.tsx lib/demo.ts app/layout.tsx
-npx tsc --noEmit
+npm run lint
 npm run build
 
 cd ..
-node --test scripts/verify-live-aave.test.mjs
+node --test scripts/verify-live-aave.test.mjs scripts/leaderboard-watcher.test.mjs
 ```
 
 ## Security boundaries

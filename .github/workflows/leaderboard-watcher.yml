@@ -1,0 +1,36 @@
+name: Background evidence watcher
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prover-background-evidence-watcher
+  cancel-in-progress: false
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Submit newly attested allowlisted evidence
+        env:
+          ETHEREUM_RPC_URL: ${{ secrets.PROVER_ETHEREUM_RPC_URL }}
+          CREDITCOIN_PRIVATE_KEY: ${{ secrets.CREDITCOIN_PRIVATE_KEY }}
+          PROVER_BORROWER_WATCHLIST: ${{ secrets.PROVER_BORROWER_WATCHLIST }}
+          CREDITCOIN_RPC_URL: https://rpc.cc3-testnet.creditcoin.network
+          CREDITCOIN_PROOF_BUILDER_URL: https://prover.cc3-testnet.creditcoin.network
+        run: |
+          if [ -z "$ETHEREUM_RPC_URL" ] || [ -z "$CREDITCOIN_PRIVATE_KEY" ] || [ -z "$PROVER_BORROWER_WATCHLIST" ]; then
+            echo "Watcher is inactive until its three repository secrets are configured."
+            exit 0
+          fi
+          node scripts/leaderboard-watcher.mjs --submit
