@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   proofEngines,
   proofEngineById,
@@ -6,6 +7,7 @@ import {
   publicAaveCase,
 } from '@/lib/proof-engines';
 import { classifyProofIntent, type PreflightResult } from '@/lib/proof-router';
+import { runProofPreflight, validatePreflightRequest } from '@/lib/proof-preflight';
 import {
   ArrowRight,
   CheckCircle2,
@@ -16,6 +18,7 @@ import {
 } from 'lucide-react';
 
 export default function ProofRouter() {
+  const [searchParams] = useSearchParams();
   const [intent, setIntent] = useState('');
   const [classification, setClassification] = useState<{
     engineId: ProofEngineId | null;
@@ -33,6 +36,18 @@ export default function ProofRouter() {
     setClassification(result);
     if (result.engineId) setSelectedEngine(result.engineId);
   };
+
+  useEffect(() => {
+    const path = searchParams.get('path');
+    if (path === 'incident') {
+      setIntent('I want to prove a sandwich attack or a FairExit queue inversion');
+      setSelectedEngine('sandwich');
+    }
+    if (path === 'performance') {
+      setIntent('I want to prove selected Aave repayment performance');
+      setSelectedEngine('aave-performance');
+    }
+  }, [searchParams]);
 
   const handleSelectEngine = (id: ProofEngineId) => {
     setSelectedEngine(id);
@@ -59,14 +74,8 @@ export default function ProofRouter() {
     setPreflightError(null);
     setPreflightResult(null);
     try {
-      const res = await fetch('/api/proof-router/preflight', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ engineId: selectedEngine, inputs }),
-      });
-      const data = await res.json();
-      if (!res.ok) setPreflightError(data.error ?? 'Preflight failed');
-      else setPreflightResult(data);
+      const request = validatePreflightRequest({ engineId: selectedEngine, inputs });
+      setPreflightResult(await runProofPreflight(request));
     } catch (err: any) {
       setPreflightError(err?.message ?? 'Network error');
     } finally {
@@ -81,24 +90,27 @@ export default function ProofRouter() {
       {/* Header */}
       <div className="mb-12">
         <span className="font-mono text-[10px] text-[#BBBBBB] uppercase tracking-[0.3em] mb-3 block">
-          Proof Router
+          Deterministic proof router
         </span>
         <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#111111] tracking-tight leading-[1.1]">
           What do you want to{' '}
           <span className="italic text-[#888888]">prove</span>?
         </h1>
+        <p className="text-sm text-[#888888] max-w-2xl mt-4 leading-relaxed">
+          Choose a supported fact. The router only prepares evidence and reads eligibility; a court or adapter is the only component that can create a final record.
+        </p>
       </div>
 
       {/* Intent Input */}
       <div className="mb-10">
         <label className="block font-mono text-[10px] text-[#AAAAAA] uppercase tracking-[0.2em] mb-3">
-          Describe your grievance
+          Describe what you want to prove
         </label>
         <div className="flex gap-3">
           <textarea
             value={intent}
             onChange={(e) => setIntent(e.target.value)}
-            placeholder="e.g. A relay sandwiched my Uniswap swap, or The vault processed my withdrawal out of order"
+            placeholder="e.g. A relay sandwiched my swap; a vault skipped my exit; or I want to document an Aave repayment"
             className="flex-1 border border-[#E5E5E5] bg-white p-4 font-mono text-sm text-[#111111] placeholder:text-[#CCCCCC] resize-none h-24 focus:outline-none focus:border-[#111111] transition-colors"
           />
           <button
@@ -208,7 +220,7 @@ export default function ProofRouter() {
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-mono text-[10px] text-[#BBBBBB] uppercase tracking-[0.2em]">
-                  Read-Only Preflight
+                Live Read-Only Preflight
                 </h3>
                 {selectedEngine === 'aave-performance' && (
                   <button
@@ -258,7 +270,7 @@ export default function ProofRouter() {
                 )}
               </button>
               <p className="mt-3 font-mono text-[9px] text-[#CCCCCC] text-center">
-                Read-only. No on-chain transactions are created.
+                Reads the public proof builder and CC3 contracts directly. It cannot accuse, settle, mint, or alter any record.
               </p>
             </div>
           </div>

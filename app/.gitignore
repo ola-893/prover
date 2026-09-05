@@ -2,6 +2,10 @@ node_modules/
 build/
 dist/
 coverage/
+.vinext/dev/
+.wrangler/
+next-env.d.ts
+*.tsbuildinfo
 .DS_Store
 *.log
 .env*

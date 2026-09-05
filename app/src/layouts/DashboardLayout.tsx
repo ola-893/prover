@@ -1,4 +1,4 @@
-import { NavLink, Outlet, Navigate } from 'react-router-dom';
+import { NavLink, Outlet } from 'react-router-dom';
 import { useWallet } from '@/contexts/WalletContext';
 import {
   Search,
@@ -7,24 +7,23 @@ import {
   FileCode,
   BookOpen,
   ChevronLeft,
+  Trophy,
+  Wallet,
 } from 'lucide-react';
 
 const sidebarLinks = [
-  { to: '/dashboard/covenant', icon: Shield, label: 'Create Covenant' },
-  { to: '/dashboard/prove', icon: Search, label: 'Proof Router' },
-  { to: '/dashboard/demo', icon: Terminal, label: 'Evidence Terminal' },
+  { to: '/dashboard/prove', icon: Search, label: 'Prove a fact' },
+  { to: '/dashboard/check', icon: Shield, label: 'Check a wallet' },
+  { to: '/dashboard/leaderboard', icon: Trophy, label: 'Evidence board' },
+  { to: '/dashboard/demo', icon: Terminal, label: 'Proof anatomy' },
   { to: '/dashboard/contracts', icon: FileCode, label: 'Contracts' },
   { to: '/dashboard/docs', icon: BookOpen, label: 'Docs' },
 ];
 
 export default function DashboardLayout() {
-  const { address, chainId, disconnect } = useWallet();
+  const { address, chainId, disconnect, openWalletModal } = useWallet();
 
-  if (!address) {
-    return <Navigate to="/" replace />;
-  }
-
-  const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const shortAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : null;
   const networkName =
     chainId === 102031
       ? 'CC3 Testnet'
@@ -114,21 +113,33 @@ export default function DashboardLayout() {
 
           <div className="hidden lg:block" />
 
-          {/* Wallet */}
+          {/* Wallet is optional for public lookup and proof preflight. */}
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 font-mono text-[10px]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#1B8A5A]" />
-              <span className="text-[#AAAAAA] uppercase tracking-widest">{networkName}</span>
+              <span className="text-[#AAAAAA] uppercase tracking-widest">{address ? networkName : 'Public mode'}</span>
             </div>
-            <div className="border border-[#E5E5E5] px-3 py-1.5 font-mono text-xs text-[#555555]">
-              {shortAddress}
-            </div>
-            <button
-              onClick={disconnect}
-              className="border border-[#E5E5E5] hover:border-[#111111] text-[#AAAAAA] hover:text-[#111111] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider transition-colors"
-            >
-              Disconnect
-            </button>
+            {shortAddress ? (
+              <>
+                <div className="border border-[#E5E5E5] px-3 py-1.5 font-mono text-xs text-[#555555]">
+                  {shortAddress}
+                </div>
+                <button
+                  onClick={disconnect}
+                  className="border border-[#E5E5E5] hover:border-[#111111] text-[#AAAAAA] hover:text-[#111111] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider transition-colors"
+                >
+                  Disconnect
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={openWalletModal}
+                className="inline-flex items-center gap-2 border border-[#111111] bg-[#111111] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-white hover:bg-[#D43F3F] hover:border-[#D43F3F] transition-colors"
+              >
+                <Wallet className="w-3 h-3" />
+                Connect
+              </button>
+            )}
           </div>
         </header>
 
