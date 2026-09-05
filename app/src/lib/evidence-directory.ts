@@ -10,13 +10,23 @@ import {
 import { cc3Deployment } from '@/lib/deployment';
 
 const CC3_RPC_URL = 'https://rpc.cc3-testnet.creditcoin.network';
+const ORDERING_COURT = cc3Deployment.contracts[0].address;
 const PERFORMANCE_BUREAU = cc3Deployment.contracts[2].address;
+const AAVE_ADAPTER = cc3Deployment.contracts[3].address;
 const EVIDENCE_SBT = cc3Deployment.contracts[4].address;
+const PERFORMANCE_BUREAU_DEPLOYMENT_BLOCK = 5_393_466;
 const EVIDENCE_SBT_DEPLOYMENT_BLOCK = 5_413_260;
+const LOG_BLOCK_SPAN = 10_000;
 
 const BUREAU_ABI = [
   'function profileOf(address subject) view returns (uint32 aaveBorrowFacts, uint32 aaveRepayFacts, uint32 aaveSelfRepaymentObservations, uint32 aaveLiquidationFacts, uint32 sandwichBreaches, uint32 fifoBreaches, uint32 uncompensatedBreaches, uint128 largestObservedBorrowUsdc, uint128 totalSlashedCtc)',
   'function termsOf(address subject) view returns (uint16 collateralBps, uint16 premiumBps, uint32 bondMultiplierBps, uint128 maxBorrowUsdc, uint128 minimumBondCtc, uint256 reasonFlags)',
+  'event EvidenceRecorded(bytes32 indexed evidenceId, address indexed subject, address indexed reporter, uint8 kind, uint128 value, bool uncompensated)',
+] as const;
+
+const ORDERING_COURT_ABI = [
+  'function rulingCount() view returns (uint256)',
+  'function rulingAt(uint256 index) view returns (bytes32 rulingId, (bytes32 covenantId, uint8 kind, address operator, address affectedUser, address beneficiary, uint64 breachHeight, uint64 ruledAt, uint256 paid, uint256 shortfall, bool bureauRecorded) ruling)',
 ] as const;
 
 const SBT_ABI = [
@@ -102,6 +112,34 @@ export interface MintedEvidenceCard {
   uncompensated: boolean;
 }
 
+export interface CanonicalBorrowerObservation {
+  evidenceId: string;
+  subject: string;
+  observedAmount: bigint;
+  recordedInBlock: number;
+  transactionHash: string;
+}
+
+export interface CanonicalOrderingRuling {
+  rulingId: string;
+  covenantId: string;
+  kind: 'sandwich' | 'fifo';
+  operator: string;
+  affectedUser: string;
+  beneficiary: string;
+  breachHeight: number;
+  ruledAt: number;
+  paid: bigint;
+  shortfall: bigint;
+}
+
+export interface CanonicalEvidenceDirectory {
+  snapshotBlock: number;
+  borrowerObservations: CanonicalBorrowerObservation[];
+  sandwichRulings: CanonicalOrderingRuling[];
+  fifoRulings: CanonicalOrderingRuling[];
+}
+
 let provider: JsonRpcProvider | null = null;
 
 function cc3Provider() {
@@ -119,6 +157,38 @@ function asBigInt(value: unknown) {
 
 function resultValues(result: unknown) {
   return Array.from(result as ArrayLike<unknown>);
+}
+
+async function readLogsInRanges(
+  address: string,
+  topics: Array<string | null>,
+  fromBlock: number,
+  toBlock: number,
+) {
+  if (fromBlock > toBlock) return [];
+
+  const rpc = cc3Provider();
+  const logs = [] as Awaited<ReturnType<typeof rpc.getLogs>>;
+  for (let start = fromBlock; start <= toBlock; start += LOG_BLOCK_SPAN) {
+    const end = Math.min(start + LOG_BLOCK_SPAN - 1, toBlock);
+    logs.push(
+      ...(await rpc.getLogs({
+        address,
+        topics,
+        fromBlock: start,
+        toBlock: end,
+      })),
+    );
+  }
+  return logs;
+}
+
+function chunk<T>(items: readonly T[], size: number) {
+  const chunks: T[][] = [];
+  for (let offset = 0; offset < items.length; offset += size) {
+    chunks.push([...items.slice(offset, offset + size)]);
+  }
+  return chunks;
 }
 
 export function normalizeAddress(address: string) {
@@ -229,6 +299,97 @@ export async function readStanding(address: string): Promise<StandingReport> {
       reasonFlags: asBigInt(terms[5]),
     },
     evidenceCardCount: asBigInt(evidenceCardCount),
+  };
+}
+
+/**
+ * Reads the canonical public evidence surfaces at one CC3 block snapshot.
+ * Receipt minting is intentionally excluded: a portable ERC-5192 receipt is optional,
+ * while the bureau record or court ruling is the authoritative public result.
+ */
+export async function readCanonicalEvidenceDirectory(): Promise<CanonicalEvidenceDirectory> {
+  const rpc = cc3Provider();
+  const snapshotBlock = await rpc.getBlockNumber();
+  const bureau = new Contract(PERFORMANCE_BUREAU, BUREAU_ABI, rpc);
+  const court = new Contract(ORDERING_COURT, ORDERING_COURT_ABI, rpc);
+  const evidenceRecordedTopic = id(
+    'EvidenceRecorded(bytes32,address,address,uint8,uint128,bool)',
+  );
+
+  const [borrowerLogs, rawRulingCount] = await Promise.all([
+    readLogsInRanges(
+      PERFORMANCE_BUREAU,
+      [evidenceRecordedTopic, null, null, null],
+      PERFORMANCE_BUREAU_DEPLOYMENT_BLOCK,
+      snapshotBlock,
+    ),
+    court.rulingCount({ blockTag: snapshotBlock }),
+  ]);
+
+  const bureauInterface = new Interface(BUREAU_ABI);
+  const borrowerObservations = borrowerLogs.flatMap((log) => {
+    const event = bureauInterface.parseLog(log);
+    if (!event) return [];
+
+    const kind = asNumber(event.args.kind);
+    const reporter = getAddress(event.args.reporter).toLowerCase();
+    if (kind !== 2 || reporter !== AAVE_ADAPTER.toLowerCase()) return [];
+
+    return [
+      {
+        evidenceId: event.args.evidenceId.toLowerCase(),
+        subject: getAddress(event.args.subject),
+        observedAmount: asBigInt(event.args.value),
+        recordedInBlock: log.blockNumber,
+        transactionHash: log.transactionHash,
+      } satisfies CanonicalBorrowerObservation,
+    ];
+  });
+
+  const rulingCount = asNumber(rawRulingCount);
+  const indexes = Array.from({ length: rulingCount }, (_, index) => index);
+  const allRulings: CanonicalOrderingRuling[] = [];
+  for (const indexesInPage of chunk(indexes, 20)) {
+    const page = await Promise.all(
+      indexesInPage.map(async (index) => {
+        const result = resultValues(await court.rulingAt(index, { blockTag: snapshotBlock }));
+        return {
+          rulingId: (result[0] as string).toLowerCase(),
+          ruling: resultValues(result[1]),
+        };
+      }),
+    );
+
+    for (const { rulingId, ruling } of page) {
+      const kind = asNumber(ruling[1]);
+      const bureauRecorded = Boolean(ruling[9]);
+      if (!bureauRecorded || (kind !== 0 && kind !== 1)) continue;
+      allRulings.push({
+        rulingId,
+        covenantId: (ruling[0] as string).toLowerCase(),
+        kind: kind === 0 ? 'sandwich' : 'fifo',
+        operator: getAddress(ruling[2] as string),
+        affectedUser: getAddress(ruling[3] as string),
+        beneficiary: getAddress(ruling[4] as string),
+        breachHeight: asNumber(ruling[5]),
+        ruledAt: asNumber(ruling[6]),
+        paid: asBigInt(ruling[7]),
+        shortfall: asBigInt(ruling[8]),
+      });
+    }
+  }
+
+  return {
+    snapshotBlock,
+    borrowerObservations: borrowerObservations.sort(
+      (left, right) => right.recordedInBlock - left.recordedInBlock,
+    ),
+    sandwichRulings: allRulings
+      .filter((ruling) => ruling.kind === 'sandwich')
+      .sort((left, right) => right.ruledAt - left.ruledAt),
+    fifoRulings: allRulings
+      .filter((ruling) => ruling.kind === 'fifo')
+      .sort((left, right) => right.ruledAt - left.ruledAt),
   };
 }
 
