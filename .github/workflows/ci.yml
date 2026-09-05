@@ -34,7 +34,6 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
       - run: npm ci
-      - name: Lint product sources
-        run: npx oxlint app/page.tsx components/performance-demo.tsx lib/demo.ts app/layout.tsx
-      - run: npx tsc --noEmit
+      - name: Type-check product sources
+        run: npm run lint
       - run: npm run build
