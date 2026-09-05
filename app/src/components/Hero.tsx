@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Search, ShieldCheck } from 'lucide-react';
 import { useWallet } from '@/contexts/WalletContext';
 
 function SplitLine({ text, delay, className }: { text: string; delay: number; className?: string }) {
@@ -129,7 +129,7 @@ export default function Hero() {
         transition={{ duration: 0.8, delay: 1.4 }}
       >
         <span className="font-mono text-[10px] text-[#AAAAAA] uppercase tracking-[0.25em]">
-          Cross-chain evidence
+          Public evidence workspace
         </span>
       </motion.div>
 
@@ -146,14 +146,14 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <span className="font-mono text-[10px] text-[#AAAAAA] uppercase tracking-[0.3em]">
-            CC3 Testnet · Live
+            Attestcoin-authenticated · CC3 Testnet
           </span>
         </motion.div>
 
         {/* Massive headline */}
         <h1 className="font-serif text-[11vw] sm:text-[9.5vw] lg:text-[8vw] xl:text-[7.2vw] leading-[0.92] tracking-[-0.02em] text-[#111111] mb-8 sm:mb-12">
-          <SplitLine text="Prove the order." delay={0.4} className="block" />
-          <SplitLine text="Enforce the promise." delay={0.9} className="block mt-1 sm:mt-2 text-[#888888]" />
+          <SplitLine text="Prove what happened." delay={0.4} className="block" />
+          <SplitLine text="Carry the evidence." delay={0.9} className="block mt-1 sm:mt-2 text-[#888888]" />
         </h1>
 
         {/* Subline */}
@@ -164,33 +164,50 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 1.5 }}
           >
-            Authenticated transactions. Deterministic predicates. Permanent rulings.
+            Use authenticated transaction paths to establish a supported attack, a repayment observation, or a financial promise outcome—then inspect the record anywhere.
           </motion.p>
 
-          {/* CTA */}
+          {/* The three core user journeys are available before a wallet is connected. */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.7 }}
+            className="grid max-w-3xl grid-cols-1 sm:grid-cols-3 border border-[#111111] bg-white"
           >
-            {address ? (
-              <Link
-                to="/dashboard"
-                className="group inline-flex items-center gap-3 border border-[#111111] px-8 py-4 font-mono text-xs uppercase tracking-[0.2em] text-[#111111] hover:bg-[#111111] hover:text-white transition-all duration-500"
-              >
-                Enter the Court
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
-            ) : (
-              <button
-                onClick={openWalletModal}
-                className="group inline-flex items-center gap-3 border border-[#111111] px-8 py-4 font-mono text-xs uppercase tracking-[0.2em] text-[#111111] hover:bg-[#111111] hover:text-white transition-all duration-500"
-              >
-                Connect Wallet
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
-            )}
+            <Link
+              to="/dashboard/prove?path=incident"
+              className="group border-b sm:border-b-0 sm:border-r border-[#E5E5E5] p-4 sm:p-5 hover:bg-[#111111] transition-colors"
+            >
+              <span className="font-mono text-[9px] text-[#D43F3F] group-hover:text-[#D43F3F] uppercase tracking-widest">I was attacked</span>
+              <span className="mt-2 flex items-center justify-between font-serif text-lg text-[#111111] group-hover:text-white">Prove an incident <ArrowRight className="w-4 h-4" /></span>
+              <span className="mt-2 block text-xs text-[#888888] group-hover:text-white/55">Sandwich, FIFO, or a supported promise breach.</span>
+            </Link>
+            <Link
+              to="/dashboard/prove?path=performance"
+              className="group border-b sm:border-b-0 sm:border-r border-[#E5E5E5] p-4 sm:p-5 hover:bg-[#111111] transition-colors"
+            >
+              <span className="font-mono text-[9px] text-[#1B8A5A] group-hover:text-[#1B8A5A] uppercase tracking-widest">I want a report card</span>
+              <span className="mt-2 flex items-center justify-between font-serif text-lg text-[#111111] group-hover:text-white">Prove performance <ShieldCheck className="w-4 h-4" /></span>
+              <span className="mt-2 block text-xs text-[#888888] group-hover:text-white/55">Selected Aave repayment evidence and terms.</span>
+            </Link>
+            <Link
+              to="/dashboard/check"
+              className="group p-4 sm:p-5 hover:bg-[#111111] transition-colors"
+            >
+              <span className="font-mono text-[9px] text-[#888888] group-hover:text-[#BBBBBB] uppercase tracking-widest">I need to assess someone</span>
+              <span className="mt-2 flex items-center justify-between font-serif text-lg text-[#111111] group-hover:text-white">Check a wallet <Search className="w-4 h-4" /></span>
+              <span className="mt-2 block text-xs text-[#888888] group-hover:text-white/55">Read the public evidence record without connecting.</span>
+            </Link>
           </motion.div>
+
+          {!address && (
+            <button
+              onClick={openWalletModal}
+              className="mt-5 font-mono text-[10px] uppercase tracking-widest text-[#888888] hover:text-[#111111] transition-colors"
+            >
+              Connect a wallet when you are ready to sign or mint →
+            </button>
+          )}
         </motion.div>
       </motion.div>
 
@@ -202,7 +219,7 @@ export default function Hero() {
         transition={{ duration: 0.6, delay: 2 }}
       >
         <span className="font-mono text-[10px] text-[#CCCCCC] uppercase tracking-[0.2em]">
-          Scroll to explore
+          Public lookup · No wallet required
         </span>
       </motion.div>
 

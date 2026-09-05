@@ -38,7 +38,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-xs text-[#999999] max-w-sm leading-relaxed font-sans">
-              A cross-chain bureau of fulfilled and breached financial promises. Turns authenticated source-chain transactions into typed evidence, applies deterministic breach predicates, settles bonded covenants.
+              A cross-chain bureau of fulfilled and breached financial promises. It turns authenticated source-chain transactions into typed evidence, applies fixed predicates, and makes terminal records portable as soulbound report cards.
             </p>
             <div className="flex items-center gap-4 text-[11px] font-mono text-[#666666]">
               <span>CC3 TESTNET</span>
@@ -119,9 +119,9 @@ export default function Footer() {
 
         {/* Tagline */}
         <div className="relative z-10 flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-mono text-[10px] sm:text-xs text-[#666666] uppercase tracking-widest mt-4 sm:mt-6">
-          <span>Prove the order</span>
+          <span>Prove what happened</span>
           <span className="text-[#444444]">·</span>
-          <span>Enforce the promise</span>
+          <span>Carry the evidence</span>
           <span className="text-[#444444]">·</span>
           <span>CC3 Testnet</span>
         </div>

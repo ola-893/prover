@@ -91,7 +91,7 @@ export default function WalletModal() {
                   Connect Wallet
                 </h3>
                 <p className="font-mono text-[10px] text-[#999999] uppercase tracking-widest mt-1">
-                  Choose a provider to continue
+                  Needed only for a signed on-chain action
                 </p>
               </div>
               <button

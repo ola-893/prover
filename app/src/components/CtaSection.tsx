@@ -36,9 +36,9 @@ export default function CtaSection() {
           transition={{ duration: 0.7, delay: 0.1 }}
           className="font-serif text-4xl sm:text-5xl lg:text-7xl text-white tracking-tight leading-[1.05] mb-10"
         >
-          Every promise leaves a trace.
+          Start with the fact.
           <br />
-          <span className="italic text-[#555555]">Prove it.</span>
+          <span className="italic text-[#555555]">Let the record speak.</span>
         </motion.h2>
 
         <motion.div
@@ -46,23 +46,22 @@ export default function CtaSection() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          {address ? (
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              to="/dashboard"
-              className="inline-flex items-center gap-4 border border-white px-10 py-5 font-mono text-xs uppercase tracking-[0.15em] text-white hover:bg-white hover:text-[#111111] transition-all duration-300 group"
+              to="/dashboard/prove"
+              className="inline-flex items-center gap-4 border border-white px-8 py-4 font-mono text-xs uppercase tracking-[0.15em] text-white hover:bg-white hover:text-[#111111] transition-all duration-300 group"
             >
-              Enter Dashboard
+              Prove a fact
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-          ) : (
-            <button
-              onClick={openWalletModal}
-              className="inline-flex items-center gap-4 border border-white px-10 py-5 font-mono text-xs uppercase tracking-[0.15em] text-white hover:bg-white hover:text-[#111111] transition-all duration-300 group"
+            <Link
+              to="/dashboard/check"
+              className="inline-flex items-center gap-4 border border-[#555555] px-8 py-4 font-mono text-xs uppercase tracking-[0.15em] text-[#BBBBBB] hover:border-white hover:text-white transition-all duration-300 group"
             >
-              Connect Wallet
+              Check a wallet
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          )}
+            </Link>
+          </div>
         </motion.div>
 
         <motion.p
@@ -71,8 +70,17 @@ export default function CtaSection() {
           transition={{ duration: 0.6, delay: 0.5 }}
           className="mt-8 font-mono text-[10px] text-[#444444] uppercase tracking-widest"
         >
-          Non-custodial · Deterministic · CC3 Testnet
+          Public lookup · Deterministic predicates · CC3 Testnet
         </motion.p>
+
+        {!address && (
+          <button
+            onClick={openWalletModal}
+            className="mt-5 font-mono text-[10px] text-[#666666] hover:text-white uppercase tracking-widest transition-colors"
+          >
+            Connect only when you need to sign or mint
+          </button>
+        )}
       </div>
 
     </section>

@@ -8,39 +8,39 @@ export default function ProofEngines() {
 
   const engines = [
     {
-      id: 'fifo',
-      title: 'FIFO Violation',
+      id: 'sandwich',
+      title: 'Sandwich ordering breach',
       contract: 'OrderingCourt',
-      desc: 'First-in-first-out enforcement across the settlement epoch. Proves a trade was filled out of position using a Merkle ordering proof.',
+      desc: 'Tests whether a relay-controlled front-run and back-run sit immediately around an authorized victim swap in one authenticated source block.',
       tag: 'Merkle Order',
     },
     {
-      id: 'sandwich',
-      title: 'Sandwich Attack',
+      id: 'fair-exit',
+      title: 'FairExit queue inversion',
       contract: 'OrderingCourt',
-      desc: 'Detects predatory front-run/back-run patterns against a victim transaction. Same block, same epoch, provable causal chain.',
-      tag: 'Pattern Match',
+      desc: 'Tests the fixed request A < request B < process B < process A predicate for a policy-bound vault exit queue.',
+      tag: 'Cross-block order',
     },
     {
       id: 'aave',
-      title: 'Aave Performance',
+      title: 'Aave repayment observation',
       contract: 'PerformanceBureau',
-      desc: 'Measures real yield and drawdown against promised APY. Compares on-chain aToken balances across declared periods.',
-      tag: 'Time Series',
+      desc: 'Binds one selected Aave V3 USDC Borrow and a later same-address Repay into a narrow, explainable performance observation.',
+      tag: 'Receipt events',
     },
     {
       id: 'rfq',
-      title: 'RFQ Comparison',
-      contract: 'CovenantBook',
-      desc: 'Compares quoted spreads against actual execution. Proves whether a market maker honored their posted price.',
-      tag: 'Price Diff',
+      title: 'RFQ promise outcome',
+      contract: 'PromiseCourt',
+      desc: 'Authenticates the exact committed RFQ event and checks actor, recipient, amount, terms, and timing against a prospectively activated promise.',
+      tag: 'Committed terms',
     },
     {
       id: 'settlement',
-      title: 'Settlement Breach',
+      title: 'Settlement promise outcome',
       contract: 'PromiseCourt',
-      desc: 'Determines whether a bonded promise was fulfilled within its declared terms. Binary predicate, zero discretion.',
-      tag: 'Term Check',
+      desc: 'Authenticates a release event and applies a fixed policy to classify fulfillment, a specific mismatch, lateness, or a defaulted promise.',
+      tag: 'Receipt events',
     },
   ];
 
@@ -56,12 +56,12 @@ export default function ProofEngines() {
           className="mb-20"
         >
           <span className="font-mono text-[10px] text-[#555555] uppercase tracking-[0.3em] mb-4 block">
-            Engines
+            Proof engines
           </span>
           <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-white tracking-tight leading-[1.1]">
-            Five predicates.
+            What Prover can
             <br />
-            <span className="italic text-[#555555]">Zero interpretation.</span>
+            <span className="italic text-[#555555]">prove today.</span>
           </h2>
         </motion.div>
 

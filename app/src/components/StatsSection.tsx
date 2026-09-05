@@ -36,10 +36,10 @@ export default function StatsSection() {
   const inView = useInView(ref, { once: true, margin: '-100px' });
 
   const stats = [
-    { value: 9, label: 'Deployed Contracts', suffix: '' },
-    { value: 5, label: 'Proof Engines', suffix: '' },
-    { value: 0, label: 'Discretion', suffix: '' },
-    { value: 100, label: 'Deterministic', suffix: '%' },
+    { value: 5, label: 'Supported proof routes', suffix: '' },
+    { value: 3, label: 'Live evidence roles', suffix: '' },
+    { value: 0, label: 'Human verdicts', suffix: '' },
+    { value: 1, label: 'Soulbound card standard', suffix: '' },
   ];
 
   return (

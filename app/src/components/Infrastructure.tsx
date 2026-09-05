@@ -1,18 +1,18 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
+import { cc3Deployment, shortAddress } from '@/lib/deployment';
 
 export default function Infrastructure() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
 
   const contracts = [
-    { name: 'OrderingCourt', addr: '0xc01f…c5Ff', role: 'FIFO ordering + sandwich detection' },
-    { name: 'CovenantBook', addr: '0x66aF…4223', role: 'Covenant registry + RFQ comparison' },
-    { name: 'PerformanceBureau', addr: '0x8Ef4…D74', role: 'Aave yield + drawdown predicates' },
-    { name: 'PromiseCourt', addr: '0x41A8…CDcd', role: 'Settlement rulings + breach verdicts' },
-    { name: 'PromiseBook', addr: '0x31B6…0821', role: 'Promise lifecycle + state machine' },
-    { name: 'AaveAdapter', addr: '0xbA6e…1a02', role: 'AAVE aToken balance snapshots' },
-    { name: 'BureauEvidenceSBT', addr: '0x59e4…D442', role: 'Soulbound evidence tokens' },
+    { ...cc3Deployment.contracts[0], role: 'Sandwich and FIFO order predicates' },
+    { ...cc3Deployment.contracts[1], role: 'Prior no-sandwich and FIFO covenants' },
+    { ...cc3Deployment.contracts[2], role: 'Canonical typed evidence record' },
+    { ...cc3Deployment.contracts[3], role: 'Selected Aave Borrow and Repay facts' },
+    { ...cc3Deployment.contracts[4], role: 'ERC-5192 soulbound evidence cards' },
+    { ...cc3Deployment.promiseContracts[0], role: 'Committed RFQ and settlement outcomes' },
   ];
 
   return (
@@ -36,7 +36,7 @@ export default function Infrastructure() {
                 Deployed on CC3 testnet
               </h2>
               <p className="font-sans text-sm text-[#666666] leading-relaxed max-w-md">
-                Nine contracts forming the evidence pipeline. Each handles one concern. No monolithic logic.
+                The live CC3 contracts form a deliberately narrow evidence pipeline. Each holds one boundary instead of claiming to know a wallet’s whole financial life.
               </p>
             </motion.div>
           </div>
@@ -45,7 +45,7 @@ export default function Infrastructure() {
           <div className="lg:col-span-7">
             {contracts.map((c, i) => (
               <motion.div
-                key={c.name}
+                key={c.label}
                 initial={{ opacity: 0, x: 20 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.4, delay: i * 0.06 }}
@@ -53,12 +53,12 @@ export default function Infrastructure() {
               >
                 <div className="sm:col-span-4">
                   <span className="font-mono text-xs sm:text-sm text-[#111111] font-bold tracking-tight group-hover:text-[#D43F3F] transition-colors">
-                    {c.name}
+                    {c.label}
                   </span>
                 </div>
                 <div className="sm:col-span-3">
                   <span className="font-mono text-[10px] sm:text-xs text-[#888888]">
-                    {c.addr}
+                    {shortAddress(c.address)}
                   </span>
                 </div>
                 <div className="sm:col-span-5">

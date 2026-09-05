@@ -10,25 +10,25 @@ export default function HowItWorks() {
     {
       num: '01',
       icon: Shield,
-      title: 'Covenant',
-      desc: 'Promises are locked on-chain with bonded CTC collateral. Terms are explicit. Stakes are real.',
-      contracts: ['CovenantBook', 'PromiseBook'],
+      title: 'Choose a fact',
+      desc: 'Start with a supported claim: an adjacent sandwich pattern, a completed FIFO inversion, a selected Aave repayment observation, or a committed promise outcome.',
+      contracts: ['Incident', 'Performance', 'Promise'],
       color: 'text-[#1B8A5A]',
     },
     {
       num: '02',
       icon: Search,
-      title: 'Evidence',
-      desc: 'Source-chain transactions are authenticated, typed, and fed into deterministic breach predicates. No interpretation.',
-      contracts: ['BureauEvidenceSBT', 'PerformanceBureau'],
+      title: 'Authenticate the record',
+      desc: 'Attestcoin proof packets authenticate source transactions. Their Merkle paths expose fixed transaction positions, so the court can test an exact order without trusting a sequencer’s explanation.',
+      contracts: ['Attestcoin', 'Ordering Court', 'Aave Adapter'],
       color: 'text-[#D43F3F]',
     },
     {
       num: '03',
       icon: Gavel,
-      title: 'Ruling',
-      desc: 'Merkle-order proofs determine FIFO position, sandwich detection, or covenant breach. Collateral is distributed automatically.',
-      contracts: ['OrderingCourt', 'PromiseCourt'],
+      title: 'Record and carry it',
+      desc: 'Only a fixed predicate can create the terminal bureau record. Its matching ERC-5192 report card can then be minted, permanently locked, and checked by any counterparty.',
+      contracts: ['Performance Bureau', 'Evidence SBT'],
       color: 'text-[#111111]',
     },
   ];
@@ -48,9 +48,9 @@ export default function HowItWorks() {
             How it works
           </span>
           <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-[#111111] tracking-tight leading-[1.1]">
-            Three positions.
+            Three steps.
             <br />
-            <span className="italic text-[#888888]">One enforcement.</span>
+            <span className="italic text-[#888888]">One evidence standard.</span>
           </h2>
         </motion.div>
 
